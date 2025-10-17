@@ -6,7 +6,6 @@ from sqlalchemy import Column, Integer, String, DateTime, Text
 from sqlalchemy.sql import func
 from app.db.database import Base
 
-
 class Setting(Base):
     """Settings model for clinic information / مدل تنظیمات برای اطلاعات کلینیک"""
     __tablename__ = "settings"

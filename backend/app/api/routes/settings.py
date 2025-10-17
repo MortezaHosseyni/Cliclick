@@ -6,7 +6,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from app.db.database import get_db
 from app.db.models.user import User
-from app.db.models.setting import Setting
+from app.db.models.settings import Setting
 from app.db.schemas.setting import SettingCreate, SettingUpdate, SettingResponse
 from app.core.security import get_current_admin, get_current_user
 from app.utils.messages_fa import ERROR_MESSAGES, SUCCESS_MESSAGES
