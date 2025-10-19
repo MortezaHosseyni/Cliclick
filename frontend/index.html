@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>سیستم مدیریت کلینیک</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .navbar-brand { font-weight: bold; font-size: 1.5rem; }
+        .hero { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 100px 0; }
+        .feature-icon { font-size: 3rem; color: #667eea; }
+        .card { transition: transform 0.3s; border: none; box-shadow: 0 2px 15px rgba(0,0,0,0.1); }
+        .card:hover { transform: translateY(-5px); }
+        footer { background-color: #2c3e50; color: white; }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light sticky-top shadow-sm">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="bi bi-hospital"></i> سیستم مدیریت کلینیک
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item"><a class="nav-link" href="#features">امکانات</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#about">درباره ما</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#contact">تماس با ما</a></li>
+                </ul>
+                <div class="d-flex">
+                    <button class="btn btn-outline-primary me-2" onclick="location.href='#'">
+                        <i class="bi bi-box-arrow-in-right"></i> ورود
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <section class="hero text-center">
+        <div class="container">
+            <h1 class="display-4 fw-bold mb-4">سیستم جامع مدیریت کلینیک</h1>
+            <p class="lead mb-5">مدیریت حرفه‌ای بیماران، نوبت‌ها، نسخه‌ها و گزارشات پزشکی</p>
+            <button class="btn btn-light btn-lg px-5" onclick="showLoginModal()">
+                <i class="bi bi-rocket-takeoff"></i> شروع کنید
+            </button>
+        </div>
+    </section>
+
+    <section id="features" class="py-5">
+        <div class="container">
+            <h2 class="text-center mb-5">امکانات سیستم</h2>
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <div class="card p-4 text-center h-100">
+                        <i class="bi bi-people feature-icon mb-3"></i>
+                        <h5>مدیریت بیماران</h5>
+                        <p class="text-muted">ثبت و مدیریت کامل اطلاعات بیماران و سوابق پزشکی</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card p-4 text-center h-100">
+                        <i class="bi bi-calendar-check feature-icon mb-3"></i>
+                        <h5>مدیریت نوبت‌ها</h5>
+                        <p class="text-muted">برنامه‌ریزی و مدیریت نوبت‌های ویزیت بیماران</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card p-4 text-center h-100">
+                        <i class="bi bi-prescription2 feature-icon mb-3"></i>
+                        <h5>نسخه‌نویسی</h5>
+                        <p class="text-muted">ثبت و مدیریت نسخه‌های پزشکی و داروها</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card p-4 text-center h-100">
+                        <i class="bi bi-capsule feature-icon mb-3"></i>
+                        <h5>مدیریت داروها</h5>
+                        <p class="text-muted">پایگاه داده کامل از داروها و موجودی انبار</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card p-4 text-center h-100">
+                        <i class="bi bi-file-earmark-medical feature-icon mb-3"></i>
+                        <h5>مدیریت فاکتورها</h5>
+                        <p class="text-muted">ثبت و پیگیری فاکتورهای درمانی بیماران</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card p-4 text-center h-100">
+                        <i class="bi bi-graph-up feature-icon mb-3"></i>
+                        <h5>گزارش‌گیری</h5>
+                        <p class="text-muted">گزارشات جامع و تحلیل‌های آماری</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="about" class="py-5 bg-light">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <h2 class="mb-4">درباره سیستم</h2>
+                    <p class="lead">سیستم مدیریت کلینیک ما یک راهکار جامع و کاربرپسند برای مدیریت تمامی فرآیندهای کلینیک‌های پزشکی است.</p>
+                    <ul class="list-unstyled">
+                        <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i> رابط کاربری ساده و کاربرپسند</li>
+                        <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i> امنیت بالا و حفظ حریم خصوصی</li>
+                        <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i> پشتیبانی آنلاین</li>
+                        <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i> گزارش‌های تحلیلی پیشرفته</li>
+                    </ul>
+                </div>
+                <div class="col-md-6 text-center">
+                    <i class="bi bi-hospital" style="font-size: 15rem; color: #667eea; opacity: 0.3;"></i>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="contact" class="py-5">
+        <div class="container">
+            <h2 class="text-center mb-5">تماس با ما</h2>
+            <div class="row justify-content-center">
+                <div class="col-md-8">
+                    <div class="card p-4">
+                        <form id="contactForm">
+                            <div class="mb-3">
+                                <label class="form-label">نام و نام خانوادگی</label>
+                                <input type="text" class="form-control" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">شماره تماس</label>
+                                <input type="tel" class="form-control" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">پیام</label>
+                                <textarea class="form-control" rows="4" required></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary w-100">ارسال پیام</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="py-4 text-center">
+        <div class="container">
+            <p class="mb-0">&copy; 2025 سیستم مدیریت کلینیک. تمامی حقوق محفوظ است.</p>
+        </div>
+    </footer>
+
+    <!-- Login Modal -->
+    <div class="modal fade" id="loginModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">ورود به سیستم</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="loginForm">
+                        <div class="mb-3">
+                            <label class="form-label">شماره تلفن</label>
+                            <input type="tel" class="form-control" id="phone_number" maxlength="11" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">رمز عبور</label>
+                            <input type="password" class="form-control" id="password" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">ورود</button>
+                    </form>
+                    <div id="loginError" class="alert alert-danger mt-3 d-none"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const API_URL = 'http://localhost:1212';
+        let loginModalInstance;
+
+        document.addEventListener('DOMContentLoaded', function() {
+            loginModalInstance = new bootstrap.Modal(document.getElementById('loginModal'));
+            
+            document.getElementById('loginForm').addEventListener('submit', handleLogin);
+            document.getElementById('contactForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                alert('پیام شما با موفقیت ارسال شد!');
+                this.reset();
+            });
+        });
+
+        function showLoginModal() {
+            loginModalInstance.show();
+        }
+
+        async function handleLogin(e) {
+            e.preventDefault();
+            const phone = document.getElementById('phone_number').value;
+            const password = document.getElementById('password').value;
+
+            try {
+                const response = await fetch(`${API_URL}/api/v1/auth/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ phone_number: phone, password: password })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    localStorage.setItem('access_token', data.access_token);
+                    localStorage.setItem('refresh_token', data.refresh_token);
+                    localStorage.setItem('user', JSON.stringify(data.user));
+                    window.location.href = 'dashboard.html';
+                } else {
+                    showError('شماره تلفن یا رمز عبور اشتباه است');
+                }
+            } catch (error) {
+                showError('خطا در اتصال به سرور');
+            }
+        }
+
+        function showError(message) {
+            const errorDiv = document.getElementById('loginError');
+            errorDiv.textContent = message;
+            errorDiv.classList.remove('d-none');
+            setTimeout(() => errorDiv.classList.add('d-none'), 3000);
+        }
+    </script>
+</body>
+</html>

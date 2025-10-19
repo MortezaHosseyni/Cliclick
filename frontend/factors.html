@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مدیریت فاکتورها</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <style>
+        body { background-color: #f8f9fa; }
+        .sidebar { height: 100vh; position: fixed; right: 0; top: 0; width: 250px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding-top: 20px; }
+        .sidebar a { color: white; text-decoration: none; padding: 12px 20px; display: block; transition: 0.3s; }
+        .sidebar a:hover, .sidebar a.active { background-color: rgba(255,255,255,0.2); }
+        .main-content { margin-right: 250px; padding: 20px; }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <div class="text-center mb-4">
+            <h5 class="text-white"><i class="bi bi-hospital"></i> کلینیک</h5>
+        </div>
+        <a href="dashboard.html"><i class="bi bi-speedometer2"></i> داشبورد</a>
+        <a href="patients.html" id="patientsLink"><i class="bi bi-people"></i> بیماران</a>
+        <a href="appointments.html"><i class="bi bi-calendar-check"></i> نوبت‌ها</a>
+        <a href="prescriptions.html"><i class="bi bi-prescription2"></i> نسخه‌ها</a>
+        <a href="medications.html"><i class="bi bi-capsule"></i> داروها</a>
+        <a href="factors.html" class="active"><i class="bi bi-file-earmark-medical"></i> فاکتورها</a>
+        <a href="insurance.html"><i class="bi bi-shield-check"></i> بیمه</a>
+        <a href="support.html"><i class="bi bi-chat-dots"></i> پشتیبانی</a>
+        <a href="reports.html"><i class="bi bi-graph-up"></i> گزارشات</a>
+        <a href="settings.html"><i class="bi bi-gear"></i> تنظیمات</a>
+        <hr class="bg-white">
+        <a href="#" onclick="logout()"><i class="bi bi-box-arrow-right"></i> خروج</a>
+    </div>
+
+    <div class="main-content">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>مدیریت فاکتورها</h2>
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#factorModal" onclick="resetForm()" id="addBtn">
+                <i class="bi bi-plus-circle"></i> فاکتور جدید
+            </button>
+        </div>
+
+        <div class="row g-3 mb-4" id="statsSection">
+            <div class="col-md-3">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <h6 class="text-muted">کل فاکتورها</h6>
+                        <h3 id="totalFactors">0</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <h6 class="text-muted">کل واحدها</h6>
+                        <h3 class="text-info" id="totalUnits">0</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <h6 class="text-muted">کل هزینه</h6>
+                        <h3 class="text-success" id="totalCost">0</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <h6 class="text-muted">میانگین هزینه</h6>
+                        <h3 class="text-warning" id="avgCost">0</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mb-3">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4 mb-2" id="patientFilterDiv">
+                        <select class="form-select" id="patientFilter">
+                            <option value="">همه بیماران</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3 mb-2">
+                        <input type="date" class="form-control" id="dateFilter">
+                    </div>
+                    <div class="col-md-3 mb-2">
+                        <input type="text" class="form-control" id="searchInput" placeholder="جستجو...">
+                    </div>
+                    <div class="col-md-2 mb-2">
+                        <button class="btn btn-secondary w-100" onclick="clearFilters()">پاک کردن</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>بیمار</th>
+                                <th>نوع فاکتور</th>
+                                <th>تاریخ تزریق</th>
+                                <th>واحدها</th>
+                                <th>شماره دسته</th>
+                                <th>تزریق توسط</th>
+                                <th>هزینه</th>
+                                <th>عملیات</th>
+                            </tr>
+                        </thead>
+                        <tbody id="factorsTable">
+                            <tr><td colspan="8" class="text-center">در حال بارگذاری...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Factor Modal -->
+    <div class="modal fade" id="factorModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalTitle">فاکتور جدید</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="factorForm">
+                        <input type="hidden" id="factorId">
+                        <div class="row">
+                            <div class="col-md-6 mb-3" id="patientSelectDiv">
+                                <label class="form-label">بیمار *</label>
+                                <select class="form-select" id="patient_id" required>
+                                    <option value="">انتخاب کنید...</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">نوع فاکتور *</label>
+                                <input type="text" class="form-control" id="factor_type" required placeholder="مثال: Factor VIII">
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">واحدهای تزریق شده *</label>
+                                <input type="number" class="form-control" id="units_administered" required min="1">
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">تاریخ تزریق *</label>
+                                <input type="date" class="form-control" id="administration_date_date" required>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">ساعت تزریق *</label>
+                                <input type="time" class="form-control" id="administration_time" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">شماره دسته</label>
+                                <input type="text" class="form-control" id="lot_number" placeholder="LOT-12345">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">تزریق شده توسط</label>
+                                <input type="text" class="form-control" id="administered_by">
+                            </div>
+                            <div class="col-md-12 mb-3">
+                                <label class="form-label">هزینه (تومان)</label>
+                                <input type="number" class="form-control" id="cost" min="0" step="1000">
+                            </div>
+                            <div class="col-md-12 mb-3">
+                                <label class="form-label">یادداشت‌ها</label>
+                                <textarea class="form-control" id="notes" rows="3"></textarea>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary">ذخیره</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- View Factor Modal -->
+    <div class="modal fade" id="viewModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">جزئیات فاکتور</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="viewModalBody"></div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">بستن</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const API_URL = 'http://localhost:1212';
+        let token = localStorage.getItem('access_token');
+        let user = JSON.parse(localStorage.getItem('user') || '{}');
+        let factors = [];
+        let patients = [];
+        let modalInstance, viewModalInstance;
+
+        if (!token) window.location.href = 'index.html';
+
+        document.addEventListener('DOMContentLoaded', function() {
+            modalInstance = new bootstrap.Modal(document.getElementById('factorModal'));
+            viewModalInstance = new bootstrap.Modal(document.getElementById('viewModal'));
+            
+            if (user.role === 'Patient') {
+                document.getElementById('patientsLink').style.display = 'none';
+                document.getElementById('addBtn').style.display = 'none';
+                document.getElementById('patientSelectDiv').style.display = 'none';
+                document.getElementById('patientFilterDiv').style.display = 'none';
+                document.getElementById('statsSection').style.display = 'none';
+            } else {
+                loadPatients();
+            }
+            
+            loadFactors();
+            
+            document.getElementById('factorForm').addEventListener('submit', saveFactor);
+            document.getElementById('patientFilter').addEventListener('change', filterFactors);
+            document.getElementById('dateFilter').addEventListener('change', filterFactors);
+            document.getElementById('searchInput').addEventListener('input', filterFactors);
+        });
+
+        async function loadPatients() {
+            try {
+                const response = await fetch(`${API_URL}/api/v1/patients/patients/`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (response.ok) {
+                    patients = await response.json();
+                    const select = document.getElementById('patient_id');
+                    const filter = document.getElementById('patientFilter');
+                    
+                    const options = patients.map(p => `<option value="${p.id}">${p.user_full_name || 'نامشخص'}</option>`).join('');
+                    select.innerHTML = '<option value="">انتخاب کنید...</option>' + options;
+                    filter.innerHTML = '<option value="">همه بیماران</option>' + options;
+                }
+            } catch (error) {
+                console.error('Error loading patients:', error);
+            }
+        }
+
+        async function loadFactors() {
+            try {
+                const endpoint = user.role === 'Patient' 
+                    ? '/api/v1/factors/factors/my'
+                    : '/api/v1/factors/factors/';
+
+                const response = await fetch(`${API_URL}${endpoint}`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (response.ok) {
+                    factors = await response.json();
+                    if (user.role !== 'Patient') updateStats();
+                    displayFactors(factors);
+                }
+            } catch (error) {
+                document.getElementById('factorsTable').innerHTML = 
+                    '<tr><td colspan="8" class="text-center text-danger">خطا در بارگذاری اطلاعات</td></tr>';
+            }
+        }
+
+        function updateStats() {
+            const total = factors.length;
+            const totalUnits = factors.reduce((sum, f) => sum + (f.units_administered || 0), 0);
+            const totalCost = factors.reduce((sum, f) => sum + (f.cost || 0), 0);
+            const avgCost = total > 0 ? totalCost / total : 0;
+
+            document.getElementById('totalFactors').textContent = total;
+            document.getElementById('totalUnits').textContent = totalUnits.toLocaleString('fa-IR');
+            document.getElementById('totalCost').textContent = totalCost.toLocaleString('fa-IR') + ' تومان';
+            document.getElementById('avgCost').textContent = Math.round(avgCost).toLocaleString('fa-IR') + ' تومان';
+        }
+
+        function displayFactors(data) {
+            const tbody = document.getElementById('factorsTable');
+            if (data.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="8" class="text-center">فاکتوری یافت نشد</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = data.map(f => {
+                const date = new Date(f.administration_date);
+                const isEditable = user.role !== 'Patient';
+                
+                return `
+                    <tr>
+                        <td>${f.patient_name || 'نامشخص'}</td>
+                        <td><strong>${f.factor_type}</strong></td>
+                        <td>${date.toLocaleDateString('fa-IR')} - ${date.toLocaleTimeString('fa-IR', {hour: '2-digit', minute: '2-digit'})}</td>
+                        <td><span class="badge bg-primary">${f.units_administered}</span></td>
+                        <td>${f.lot_number || '-'}</td>
+                        <td>${f.administered_by || '-'}</td>
+                        <td>${f.cost ? f.cost.toLocaleString('fa-IR') + ' تومان' : '-'}</td>
+                        <td>
+                            <button class="btn btn-sm btn-info" onclick="viewFactor(${f.id})">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                            ${isEditable ? `
+                                <button class="btn btn-sm btn-warning" onclick="editFactor(${f.id})">
+                                    <i class="bi bi-pencil"></i>
+                                </button>
+                                <button class="btn btn-sm btn-danger" onclick="deleteFactor(${f.id})">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            ` : ''}
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function filterFactors() {
+            const patientId = document.getElementById('patientFilter').value;
+            const date = document.getElementById('dateFilter').value;
+            const search = document.getElementById('searchInput').value.toLowerCase();
+
+            let filtered = factors;
+
+            if (patientId) {
+                filtered = filtered.filter(f => f.patient_id == patientId);
+            }
+
+            if (date) {
+                filtered = filtered.filter(f => f.administration_date.startsWith(date));
+            }
+
+            if (search) {
+                filtered = filtered.filter(f => 
+                    (f.patient_name && f.patient_name.toLowerCase().includes(search)) ||
+                    (f.factor_type && f.factor_type.toLowerCase().includes(search)) ||
+                    (f.lot_number && f.lot_number.toLowerCase().includes(search))
+                );
+            }
+
+            displayFactors(filtered);
+        }
+
+        function clearFilters() {
+            document.getElementById('patientFilter').value = '';
+            document.getElementById('dateFilter').value = '';
+            document.getElementById('searchInput').value = '';
+            displayFactors(factors);
+        }
+
+        function resetForm() {
+            document.getElementById('factorForm').reset();
+            document.getElementById('factorId').value = '';
+            document.getElementById('modalTitle').textContent = 'فاکتور جدید';
+            document.getElementById('patient_id').disabled = false;
+        }
+
+        async function saveFactor(e) {
+            e.preventDefault();
+            
+            const factorId = document.getElementById('factorId').value;
+            const isEdit = !!factorId;
+
+            const date = document.getElementById('administration_date_date').value;
+            const time = document.getElementById('administration_time').value;
+            const datetime = `${date}T${time}:00`;
+
+            const data = {
+                factor_type: document.getElementById('factor_type').value,
+                units_administered: parseInt(document.getElementById('units_administered').value),
+                administration_date: datetime,
+                lot_number: document.getElementById('lot_number').value || null,
+                administered_by: document.getElementById('administered_by').value || null,
+                cost: parseFloat(document.getElementById('cost').value) || null,
+                notes: document.getElementById('notes').value || null
+            };
+
+            if (!isEdit) {
+                data.patient_id = parseInt(document.getElementById('patient_id').value);
+            }
+
+            try {
+                const url = isEdit 
+                    ? `${API_URL}/api/v1/factors/factors/${factorId}`
+                    : `${API_URL}/api/v1/factors/factors/`;
+
+                const response = await fetch(url, {
+                    method: isEdit ? 'PUT' : 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                if (response.ok) {
+                    modalInstance.hide();
+                    loadFactors();
+                    alert(isEdit ? 'فاکتور با موفقیت بروزرسانی شد' : 'فاکتور جدید ثبت شد');
+                } else {
+                    throw new Error('خطا در ذخیره اطلاعات');
+                }
+            } catch (error) {
+                alert(error.message);
+            }
+        }
+
+        function editFactor(id) {
+            const factor = factors.find(f => f.id === id);
+            if (!factor) return;
+
+            const datetime = new Date(factor.administration_date);
+            const date = datetime.toISOString().split('T')[0];
+            const time = datetime.toTimeString().slice(0, 5);
+
+            document.getElementById('factorId').value = factor.id;
+            document.getElementById('patient_id').value = factor.patient_id;
+            document.getElementById('factor_type').value = factor.factor_type;
+            document.getElementById('units_administered').value = factor.units_administered;
+            document.getElementById('administration_date_date').value = date;
+            document.getElementById('administration_time').value = time;
+            document.getElementById('lot_number').value = factor.lot_number || '';
+            document.getElementById('administered_by').value = factor.administered_by || '';
+            document.getElementById('cost').value = factor.cost || '';
+            document.getElementById('notes').value = factor.notes || '';
+            
+            document.getElementById('modalTitle').textContent = 'ویرایش فاکتور';
+            document.getElementById('patient_id').disabled = true;
+            modalInstance.show();
+        }
+
+        async function viewFactor(id) {
+            try {
+                const response = await fetch(`${API_URL}/api/v1/factors/factors/${id}`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (response.ok) {
+                    const factor = await response.json();
+                    const date = new Date(factor.administration_date);
+                    
+                    const html = `
+                        <table class="table table-sm">
+                            <tr><th>بیمار:</th><td>${factor.patient_name || 'نامشخص'}</td></tr>
+                            <tr><th>نوع فاکتور:</th><td>${factor.factor_type}</td></tr>
+                            <tr><th>واحدها:</th><td>${factor.units_administered}</td></tr>
+                            <tr><th>تاریخ تزریق:</th><td>${date.toLocaleDateString('fa-IR')} ${date.toLocaleTimeString('fa-IR')}</td></tr>
+                            <tr><th>شماره دسته:</th><td>${factor.lot_number || '-'}</td></tr>
+                            <tr><th>تزریق توسط:</th><td>${factor.administered_by || '-'}</td></tr>
+                            <tr><th>هزینه:</th><td>${factor.cost ? factor.cost.toLocaleString('fa-IR') + ' تومان' : '-'}</td></tr>
+                            ${factor.notes ? `<tr><th>یادداشت:</th><td>${factor.notes}</td></tr>` : ''}
+                        </table>
+                    `;
+                    
+                    document.getElementById('viewModalBody').innerHTML = html;
+                    viewModalInstance.show();
+                }
+            } catch (error) {
+                alert('خطا در بارگذاری اطلاعات');
+            }
+        }
+
+        async function deleteFactor(id) {
+            if (!confirm('آیا از حذف این فاکتور اطمینان دارید؟')) return;
+
+            try {
+                const response = await fetch(`${API_URL}/api/v1/factors/factors/${id}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (response.ok) {
+                    loadFactors();
+                    alert('فاکتور با موفقیت حذف شد');
+                }
+            } catch (error) {
+                alert('خطا در حذف فاکتور');
+            }
+        }
+
+        function logout() {
+            localStorage.clear();
+            window.location.href = 'index.html';
+        }
+    </script>
+</body>
+</html>

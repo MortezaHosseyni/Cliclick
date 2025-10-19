@@ -20,9 +20,10 @@ class Settings(BaseSettings):
     
     BACKEND_CORS_ORIGINS: Union[str, List[str]] = [
         "http://localhost:1212",
-        "http://localhost:8000",
+        "http://localhost:5500",
+        
         "http://127.0.0.1:1212",
-        "http://127.0.0.1:8000"
+        "http://127.0.0.1:5500",
     ]
     
     # Application

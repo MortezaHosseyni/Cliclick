@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مدیریت بیماران</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <style>
+        body { background-color: #f8f9fa; }
+        .sidebar { height: 100vh; position: fixed; right: 0; top: 0; width: 250px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding-top: 20px; }
+        .sidebar a { color: white; text-decoration: none; padding: 12px 20px; display: block; transition: 0.3s; }
+        .sidebar a:hover, .sidebar a.active { background-color: rgba(255,255,255,0.2); }
+        .main-content { margin-right: 250px; padding: 20px; }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <div class="text-center mb-4">
+            <h5 class="text-white"><i class="bi bi-hospital"></i> کلینیک</h5>
+        </div>
+        <a href="dashboard.html"><i class="bi bi-speedometer2"></i> داشبورد</a>
+        <a href="patients.html" class="active"><i class="bi bi-people"></i> بیماران</a>
+        <a href="appointments.html"><i class="bi bi-calendar-check"></i> نوبت‌ها</a>
+        <a href="prescriptions.html"><i class="bi bi-prescription2"></i> نسخه‌ها</a>
+        <a href="medications.html"><i class="bi bi-capsule"></i> داروها</a>
+        <a href="factors.html"><i class="bi bi-file-earmark-medical"></i> فاکتورها</a>
+        <a href="insurance.html"><i class="bi bi-shield-check"></i> بیمه</a>
+        <a href="support.html"><i class="bi bi-chat-dots"></i> پشتیبانی</a>
+        <a href="reports.html"><i class="bi bi-graph-up"></i> گزارشات</a>
+        <a href="settings.html"><i class="bi bi-gear"></i> تنظیمات</a>
+        <hr class="bg-white">
+        <a href="#" onclick="logout()"><i class="bi bi-box-arrow-right"></i> خروج</a>
+    </div>
+
+    <div class="main-content">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>مدیریت بیماران</h2>
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#patientModal" onclick="resetForm()">
+                <i class="bi bi-plus-circle"></i> بیمار جدید
+            </button>
+        </div>
+
+        <div class="card">
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <input type="text" class="form-control" id="searchInput" placeholder="جستجو بر اساس نام، کد ملی یا شماره تلفن...">
+                    </div>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>نام بیمار</th>
+                                <th>کد ملی</th>
+                                <th>شماره تماس</th>
+                                <th>جنسیت</th>
+                                <th>گروه خونی</th>
+                                <th>عملیات</th>
+                            </tr>
+                        </thead>
+                        <tbody id="patientsTable">
+                            <tr><td colspan="6" class="text-center">در حال بارگذاری...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Patient Modal -->
+    <div class="modal fade" id="patientModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalTitle">بیمار جدید</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="patientForm">
+                        <input type="hidden" id="patientId">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">نام و نام خانوادگی *</label>
+                                <input type="text" class="form-control" id="full_name" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">شماره تلفن *</label>
+                                <input type="tel" class="form-control" id="phone_number" maxlength="11" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">رمز عبور *</label>
+                                <input type="password" class="form-control" id="password" minlength="6">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">کد ملی</label>
+                                <input type="text" class="form-control" id="national_code" maxlength="10">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">تاریخ تولد</label>
+                                <input type="date" class="form-control" id="date_of_birth">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">جنسیت</label>
+                                <select class="form-select" id="gender">
+                                    <option value="">انتخاب کنید</option>
+                                    <option value="Male">مرد</option>
+                                    <option value="Female">زن</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">گروه خونی</label>
+                                <select class="form-select" id="blood_type">
+                                    <option value="">انتخاب کنید</option>
+                                    <option value="A+">A+</option>
+                                    <option value="A-">A-</option>
+                                    <option value="B+">B+</option>
+                                    <option value="B-">B-</option>
+                                    <option value="AB+">AB+</option>
+                                    <option value="AB-">AB-</option>
+                                    <option value="O+">O+</option>
+                                    <option value="O-">O-</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">شماره تماس اضطراری</label>
+                                <input type="tel" class="form-control" id="emergency_contact" maxlength="11">
+                            </div>
+                            <div class="col-md-12 mb-3">
+                                <label class="form-label">آدرس</label>
+                                <textarea class="form-control" id="address" rows="2"></textarea>
+                            </div>
+                            <div class="col-md-12 mb-3">
+                                <label class="form-label">سابقه پزشکی</label>
+                                <textarea class="form-control" id="medical_history" rows="3"></textarea>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary">ذخیره</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const API_URL = 'http://localhost:1212';
+        let token = localStorage.getItem('access_token');
+        let patients = [];
+        let modalInstance;
+
+        if (!token) window.location.href = 'index.html';
+
+        document.addEventListener('DOMContentLoaded', function() {
+            modalInstance = new bootstrap.Modal(document.getElementById('patientModal'));
+            loadPatients();
+            
+            document.getElementById('patientForm').addEventListener('submit', savePatient);
+            document.getElementById('searchInput').addEventListener('input', filterPatients);
+        });
+
+        async function loadPatients() {
+            try {
+                const response = await fetch(`${API_URL}/api/v1/patients/patients/`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (response.ok) {
+                    patients = await response.json();
+                    displayPatients(patients);
+                }
+            } catch (error) {
+                showError('خطا در بارگذاری اطلاعات');
+            }
+        }
+
+        function displayPatients(data) {
+            const tbody = document.getElementById('patientsTable');
+            if (data.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" class="text-center">بیماری یافت نشد</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = data.map(p => `
+                <tr>
+                    <td>${p.user_full_name || 'نامشخص'}</td>
+                    <td>${p.national_code || '-'}</td>
+                    <td>${p.user_phone || '-'}</td>
+                    <td>${p.gender === 'Male' ? 'مرد' : p.gender === 'Female' ? 'زن' : '-'}</td>
+                    <td>${p.blood_type || '-'}</td>
+                    <td>
+                        <button class="btn btn-sm btn-info" onclick="viewPatient(${p.id})">
+                            <i class="bi bi-eye"></i>
+                        </button>
+                        <button class="btn btn-sm btn-warning" onclick="editPatient(${p.id})">
+                            <i class="bi bi-pencil"></i>
+                        </button>
+                        <button class="btn btn-sm btn-danger" onclick="deletePatient(${p.id})">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function filterPatients() {
+            const search = document.getElementById('searchInput').value.toLowerCase();
+            const filtered = patients.filter(p => 
+                (p.user_full_name && p.user_full_name.toLowerCase().includes(search)) ||
+                (p.national_code && p.national_code.includes(search)) ||
+                (p.user_phone && p.user_phone.includes(search))
+            );
+            displayPatients(filtered);
+        }
+
+        function resetForm() {
+            document.getElementById('patientForm').reset();
+            document.getElementById('patientId').value = '';
+            document.getElementById('modalTitle').textContent = 'بیمار جدید';
+            document.getElementById('password').required = true;
+        }
+
+        async function savePatient(e) {
+            e.preventDefault();
+            
+            const patientId = document.getElementById('patientId').value;
+            const isEdit = !!patientId;
+
+            try {
+                // First create/update user
+                const userData = {
+                    phone_number: document.getElementById('phone_number').value,
+                    full_name: document.getElementById('full_name').value,
+                    role: 'Patient'
+                };
+
+                const password = document.getElementById('password').value;
+                if (password) userData.password = password;
+
+                let userId;
+                if (!isEdit) {
+                    const userResponse = await fetch(`${API_URL}/api/v1/users/users/`, {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${token}`,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(userData)
+                    });
+
+                    if (!userResponse.ok) throw new Error('خطا در ایجاد کاربر');
+                    const user = await userResponse.json();
+                    userId = user.id;
+                }
+
+                // Then create/update patient
+                const patientData = {
+                    national_code: document.getElementById('national_code').value || null,
+                    date_of_birth: document.getElementById('date_of_birth').value || null,
+                    gender: document.getElementById('gender').value || null,
+                    blood_type: document.getElementById('blood_type').value || null,
+                    address: document.getElementById('address').value || null,
+                    emergency_contact: document.getElementById('emergency_contact').value || null,
+                    medical_history: document.getElementById('medical_history').value || null
+                };
+
+                if (!isEdit) patientData.user_id = userId;
+
+                const url = isEdit 
+                    ? `${API_URL}/api/v1/patients/patients/${patientId}`
+                    : `${API_URL}/api/v1/patients/patients/`;
+
+                const response = await fetch(url, {
+                    method: isEdit ? 'PUT' : 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(patientData)
+                });
+
+                if (response.ok) {
+                    modalInstance.hide();
+                    loadPatients();
+                    alert(isEdit ? 'بیمار با موفقیت بروزرسانی شد' : 'بیمار جدید ثبت شد');
+                } else {
+                    throw new Error('خطا در ذخیره اطلاعات');
+                }
+            } catch (error) {
+                alert(error.message);
+            }
+        }
+
+        async function editPatient(id) {
+            const patient = patients.find(p => p.id === id);
+            if (!patient) return;
+
+            document.getElementById('patientId').value = patient.id;
+            document.getElementById('full_name').value = patient.user_full_name || '';
+            document.getElementById('phone_number').value = patient.user_phone || '';
+            document.getElementById('national_code').value = patient.national_code || '';
+            document.getElementById('date_of_birth').value = patient.date_of_birth || '';
+            document.getElementById('gender').value = patient.gender || '';
+            document.getElementById('blood_type').value = patient.blood_type || '';
+            document.getElementById('emergency_contact').value = patient.emergency_contact || '';
+            document.getElementById('address').value = patient.address || '';
+            document.getElementById('medical_history').value = patient.medical_history || '';
+            
+            document.getElementById('modalTitle').textContent = 'ویرایش بیمار';
+            document.getElementById('password').required = false;
+            document.getElementById('phone_number').readOnly = true;
+            
+            modalInstance.show();
+        }
+
+        async function deletePatient(id) {
+            if (!confirm('آیا از حذف این بیمار اطمینان دارید؟')) return;
+
+            try {
+                const response = await fetch(`${API_URL}/api/v1/patients/patients/${id}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (response.ok) {
+                    loadPatients();
+                    alert('بیمار با موفقیت حذف شد');
+                }
+            } catch (error) {
+                alert('خطا در حذف بیمار');
+            }
+        }
+
+        function viewPatient(id) {
+            window.location.href = `patient-detail.html?id=${id}`;
+        }
+
+        function logout() {
+            localStorage.clear();
+            window.location.href = 'index.html';
+        }
+
+        function showError(message) {
+            alert(message);
+        }
+    </script>
+</body>
+</html>
