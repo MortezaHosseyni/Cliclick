@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مدیریت بیمه</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <style>
+        body { background-color: #f8f9fa; }
+        .sidebar { height: 100vh; position: fixed; right: 0; top: 0; width: 250px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding-top: 20px; }
+        .sidebar a { color: white; text-decoration: none; padding: 12px 20px; display: block; transition: 0.3s; }
+        .sidebar a:hover, .sidebar a.active { background-color: rgba(255,255,255,0.2); }
+        .main-content { margin-right: 250px; padding: 20px; }
+        .expired { background-color: #f8d7da; }
+        .active-insurance { background-color: #d1e7dd; }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <div class="text-center mb-4">
+            <h5 class="text-white"><i class="bi bi-hospital"></i> کلینیک</h5>
+        </div>
+        <a href="dashboard.html"><i class="bi bi-speedometer2"></i> داشبورد</a>
+        <a href="patients.html" id="patientsLink"><i class="bi bi-people"></i> بیماران</a>
+        <a href="appointments.html"><i class="bi bi-calendar-check"></i> نوبت‌ها</a>
+        <a href="prescriptions.html"><i class="bi bi-prescription2"></i> نسخه‌ها</a>
+        <a href="medications.html"><i class="bi bi-capsule"></i> داروها</a>
+        <a href="factors.html"><i class="bi bi-file-earmark-medical"></i> فاکتورها</a>
+        <a href="insurance.html" class="active"><i class="bi bi-shield-check"></i> بیمه</a>
+        <a href="support.html"><i class="bi bi-chat-dots"></i> پشتیبانی</a>
+        <a href="reports.html"><i class="bi bi-graph-up"></i> گزارشات</a>
+        <a href="settings.html"><i class="bi bi-gear"></i> تنظیمات</a>
+        <hr class="bg-white">
+        <a href="#" onclick="logout()"><i class="bi bi-box-arrow-right"></i> خروج</a>
+    </div>
+
+    <div class="main-content">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>مدیریت بیمه</h2>
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#insuranceModal" onclick="resetForm()" id="addBtn">
+                <i class="bi bi-plus-circle"></i> بیمه جدید
+            </button>
+        </div>
+
+        <div class="row g-3 mb-4" id="statsSection">
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <h6 class="text-muted">کل بیمه‌ها</h6>
+                        <h3 id="totalInsurances">0</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <h6 class="text-muted">فعال</h6>
+                        <h3 class="text-success" id="activeInsurances">0</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <h6 class="text-muted">منقضی شده</h6>
+                        <h3 class="text-danger" id="expiredInsurances">0</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mb-3">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-5 mb-2" id="patientFilterDiv">
+                        <select class="form-select" id="patientFilter">
+                            <option value="">همه بیماران</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4 mb-2">
+                        <input type="text" class="form-control" id="searchInput" placeholder="جستجو بر اساس شرکت یا شماره بیمه...">
+                    </div>
+                    <div class="col-md-3 mb-2">
+                        <button class="btn btn-secondary w-100" onclick="clearFilters()">پاک کردن فیلترها</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>بیمار</th>
+                                <th>شرکت بیمه</th>
+                                <th>شماره بیمه‌نامه</th>
+                                <th>شماره گروه</th>
+                                <th>نوع پوشش</th>
+                                <th>تاریخ شروع</th>
+                                <th>تاریخ پایان</th>
+                                <th>وضعیت</th>
+                                <th>عملیات</th>
+                            </tr>
+                        </thead>
+                        <tbody id="insurancesTable">
+                            <tr><td colspan="9" class="text-center">در حال بارگذاری...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Insurance Modal -->
+    <div class="modal fade" id="insuranceModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalTitle">بیمه جدید</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="insuranceForm">
+                        <input type="hidden" id="insuranceId">
+                        <div class="row">
+                            <div class="col-md-6 mb-3" id="patientSelectDiv">
+                                <label class="form-label">بیمار *</label>
+                                <select class="form-select" id="patient_id" required>
+                                    <option value="">انتخاب کنید...</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">شرکت بیمه *</label>
+                                <input type="text" class="form-control" id="insurance_company" required placeholder="مثال: بیمه ایران">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">شماره بیمه‌نامه *</label>
+                                <input type="text" class="form-control" id="policy_number" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">شماره گروه</label>
+                                <input type="text" class="form-control" id="group_number">
+                            </div>
+                            <div class="col-md-12 mb-3">
+                                <label class="form-label">نوع پوشش</label>
+                                <input type="text" class="form-control" id="coverage_type" placeholder="مثال: پوشش کامل، پوشش پایه">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">تاریخ شروع</label>
+                                <input type="date" class="form-control" id="start_date">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">تاریخ پایان</label>
+                                <input type="date" class="form-control" id="end_date">
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary">ذخیره</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- View Insurance Modal -->
+    <div class="modal fade" id="viewModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">جزئیات بیمه</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="viewModalBody"></div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">بستن</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const API_URL = 'http://localhost:8000';
+        let token = localStorage.getItem('access_token');
+        let user = JSON.parse(localStorage.getItem('user') || '{}');
+        let insurances = [];
+        let patients = [];
+        let modalInstance, viewModalInstance;
+
+        if (!token) window.location.href = 'index.html';
+
+        document.addEventListener('DOMContentLoaded', function() {
+            modalInstance = new bootstrap.Modal(document.getElementById('insuranceModal'));
+            viewModalInstance = new bootstrap.Modal(document.getElementById('viewModal'));
+            
+            if (user.role === 'Patient') {
+                document.getElementById('patientsLink').style.display = 'none';
+                document.getElementById('addBtn').style.display = 'none';
+                document.getElementById('patientSelectDiv').style.display = 'none';
+                document.getElementById('patientFilterDiv').style.display = 'none';
+                document.getElementById('statsSection').style.display = 'none';
+                loadMyInsurance();
+            } else {
+                loadPatients();
+                loadInsurances();
+            }
+            
+            document.getElementById('insuranceForm').addEventListener('submit', saveInsurance);
+            document.getElementById('patientFilter').addEventListener('change', filterInsurances);
+            document.getElementById('searchInput').addEventListener('input', filterInsurances);
+        });
+
+        async function loadPatients() {
+            try {
+                const response = await fetch(`${API_URL}/api/v1/patients/patients/`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (response.ok) {
+                    patients = await response.json();
+                    const select = document.getElementById('patient_id');
+                    const filter = document.getElementById('patientFilter');
+                    
+                    const options = patients.map(p => `<option value="${p.id}">${p.user_full_name || 'نامشخص'}</option>`).join('');
+                    select.innerHTML = '<option value="">انتخاب کنید...</option>' + options;
+                    filter.innerHTML = '<option value="">همه بیماران</option>' + options;
+                }
+            } catch (error) {
+                console.error('Error loading patients:', error);
+            }
+        }
+
+        async function loadInsurances() {
+            try {
+                const response = await fetch(`${API_URL}/api/v1/insurances/insurances/`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (response.ok) {
+                    insurances = await response.json();
+                    updateStats();
+                    displayInsurances(insurances);
+                }
+            } catch (error) {
+                document.getElementById('insurancesTable').innerHTML = 
+                    '<tr><td colspan="9" class="text-center text-danger">خطا در بارگذاری اطلاعات</td></tr>';
+            }
+        }
+
+        async function loadMyInsurance() {
+            try {
+                const response = await fetch(`${API_URL}/api/v1/insurances/insurances/my`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (response.ok) {
+                    const insurance = await response.json();
+                    insurances = insurance ? [insurance] : [];
+                    displayInsurances(insurances);
+                }
+            } catch (error) {
+                document.getElementById('insurancesTable').innerHTML = 
+                    '<tr><td colspan="9" class="text-center">بیمه‌ای برای شما ثبت نشده است</td></tr>';
+            }
+        }
+
+        function updateStats() {
+            const total = insurances.length;
+            const today = new Date().toISOString().split('T')[0];
+            const active = insurances.filter(i => 
+                (!i.end_date || i.end_date >= today) && 
+                (!i.start_date || i.start_date <= today)
+            ).length;
+            const expired = insurances.filter(i => i.end_date && i.end_date < today).length;
+
+            document.getElementById('totalInsurances').textContent = total;
+            document.getElementById('activeInsurances').textContent = active;
+            document.getElementById('expiredInsurances').textContent = expired;
+        }
+
+        function displayInsurances(data) {
+            const tbody = document.getElementById('insurancesTable');
+            if (data.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="9" class="text-center">بیمه‌ای یافت نشد</td></tr>';
+                return;
+            }
+
+            const today = new Date().toISOString().split('T')[0];
+
+            tbody.innerHTML = data.map(ins => {
+                const isExpired = ins.end_date && ins.end_date < today;
+                const isActive = (!ins.end_date || ins.end_date >= today) && (!ins.start_date || ins.start_date <= today);
+                const rowClass = isExpired ? 'expired' : (isActive ? 'active-insurance' : '');
+                const statusBadge = isExpired ? 'danger' : (isActive ? 'success' : 'warning');
+                const statusText = isExpired ? 'منقضی شده' : (isActive ? 'فعال' : 'غیرفعال');
+                const isEditable = user.role !== 'Patient';
+                
+                return `
+                    <tr class="${rowClass}">
+                        <td>${ins.patient_name || 'نامشخص'}</td>
+                        <td><strong>${ins.insurance_company}</strong></td>
+                        <td>${ins.policy_number}</td>
+                        <td>${ins.group_number || '-'}</td>
+                        <td>${ins.coverage_type || '-'}</td>
+                        <td>${ins.start_date ? new Date(ins.start_date).toLocaleDateString('fa-IR') : '-'}</td>
+                        <td>${ins.end_date ? new Date(ins.end_date).toLocaleDateString('fa-IR') : '-'}</td>
+                        <td><span class="badge bg-${statusBadge}">${statusText}</span></td>
+                        <td>
+                            <button class="btn btn-sm btn-info" onclick="viewInsurance(${ins.id})">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                            ${isEditable ? `
+                                <button class="btn btn-sm btn-warning" onclick="editInsurance(${ins.id})">
+                                    <i class="bi bi-pencil"></i>
+                                </button>
+                                <button class="btn btn-sm btn-danger" onclick="deleteInsurance(${ins.id})">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            ` : ''}
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function filterInsurances() {
+            const patientId = document.getElementById('patientFilter').value;
+            const search = document.getElementById('searchInput').value.toLowerCase();
+
+            let filtered = insurances;
+
+            if (patientId) {
+                filtered = filtered.filter(i => i.patient_id == patientId);
+            }
+
+            if (search) {
+                filtered = filtered.filter(i => 
+                    (i.insurance_company && i.insurance_company.toLowerCase().includes(search)) ||
+                    (i.policy_number && i.policy_number.toLowerCase().includes(search)) ||
+                    (i.patient_name && i.patient_name.toLowerCase().includes(search))
+                );
+            }
+
+            displayInsurances(filtered);
+        }
+
+        function clearFilters() {
+            document.getElementById('patientFilter').value = '';
+            document.getElementById('searchInput').value = '';
+            displayInsurances(insurances);
+        }
+
+        function resetForm() {
+            document.getElementById('insuranceForm').reset();
+            document.getElementById('insuranceId').value = '';
+            document.getElementById('modalTitle').textContent = 'بیمه جدید';
+            document.getElementById('patient_id').disabled = false;
+        }
+
+        async function saveInsurance(e) {
+            e.preventDefault();
+            
+            const insuranceId = document.getElementById('insuranceId').value;
+            const isEdit = !!insuranceId;
+
+            const data = {
+                insurance_company: document.getElementById('insurance_company').value,
+                policy_number: document.getElementById('policy_number').value,
+                group_number: document.getElementById('group_number').value || null,
+                coverage_type: document.getElementById('coverage_type').value || null,
+                start_date: document.getElementById('start_date').value || null,
+                end_date: document.getElementById('end_date').value || null
+            };
+
+            if (!isEdit) {
+                data.patient_id = parseInt(document.getElementById('patient_id').value);
+            }
+
+            try {
+                const url = isEdit 
+                    ? `${API_URL}/api/v1/insurances/insurances/${insuranceId}`
+                    : `${API_URL}/api/v1/insurances/insurances/`;
+
+                const response = await fetch(url, {
+                    method: isEdit ? 'PUT' : 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                if (response.ok) {
+                    modalInstance.hide();
+                    user.role === 'Patient' ? loadMyInsurance() : loadInsurances();
+                    alert(isEdit ? 'بیمه با موفقیت بروزرسانی شد' : 'بیمه جدید ثبت شد');
+                } else {
+                    throw new Error('خطا در ذخیره اطلاعات');
+                }
+            } catch (error) {
+                alert(error.message);
+            }
+        }
+
+        function editInsurance(id) {
+            const insurance = insurances.find(i => i.id === id);
+            if (!insurance) return;
+
+            document.getElementById('insuranceId').value = insurance.id;
+            document.getElementById('patient_id').value = insurance.patient_id;
+            document.getElementById('insurance_company').value = insurance.insurance_company;
+            document.getElementById('policy_number').value = insurance.policy_number;
+            document.getElementById('group_number').value = insurance.group_number || '';
+            document.getElementById('coverage_type').value = insurance.coverage_type || '';
+            document.getElementById('start_date').value = insurance.start_date || '';
+            document.getElementById('end_date').value = insurance.end_date || '';
+            
+            document.getElementById('modalTitle').textContent = 'ویرایش بیمه';
+            document.getElementById('patient_id').disabled = true;
+            modalInstance.show();
+        }
+
+        async function viewInsurance(id) {
+            try {
+                const response = await fetch(`${API_URL}/api/v1/insurances/insurances/${id}`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (response.ok) {
+                    const insurance = await response.json();
+                    const today = new Date().toISOString().split('T')[0];
+                    const isExpired = insurance.end_date && insurance.end_date < today;
+                    const isActive = (!insurance.end_date || insurance.end_date >= today) && (!insurance.start_date || insurance.start_date <= today);
+                    const status = isExpired ? 'منقضی شده' : (isActive ? 'فعال' : 'غیرفعال');
+                    
+                    const html = `
+                        <table class="table table-sm">
+                            <tr><th>بیمار:</th><td>${insurance.patient_name || 'نامشخص'}</td></tr>
+                            <tr><th>شرکت بیمه:</th><td>${insurance.insurance_company}</td></tr>
+                            <tr><th>شماره بیمه‌نامه:</th><td>${insurance.policy_number}</td></tr>
+                            <tr><th>شماره گروه:</th><td>${insurance.group_number || '-'}</td></tr>
+                            <tr><th>نوع پوشش:</th><td>${insurance.coverage_type || '-'}</td></tr>
+                            <tr><th>تاریخ شروع:</th><td>${insurance.start_date ? new Date(insurance.start_date).toLocaleDateString('fa-IR') : '-'}</td></tr>
+                            <tr><th>تاریخ پایان:</th><td>${insurance.end_date ? new Date(insurance.end_date).toLocaleDateString('fa-IR') : '-'}</td></tr>
+                            <tr><th>وضعیت:</th><td><span class="badge bg-${isExpired ? 'danger' : (isActive ? 'success' : 'warning')}">${status}</span></td></tr>
+                        </table>
+                    `;
+                    
+                    document.getElementById('viewModalBody').innerHTML = html;
+                    viewModalInstance.show();
+                }
+            } catch (error) {
+                alert('خطا در بارگذاری اطلاعات');
+            }
+        }
+
+        async function deleteInsurance(id) {
+            if (!confirm('آیا از حذف این بیمه اطمینان دارید؟')) return;
+
+            try {
+                const response = await fetch(`${API_URL}/api/v1/insurances/insurances/${id}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (response.ok) {
+                    loadInsurances();
+                    alert('بیمه با موفقیت حذف شد');
+                }
+            } catch (error) {
+                alert('خطا در حذف بیمه');
+            }
+        }
+
+        function logout() {
+            localStorage.clear();
+            window.location.href = 'index.html';
+        }
+    </script>
+</body>
+</html>

@@ -1,50 +1,406 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="fa" dir="rtl">
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>ورود — کلینیک</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-  </head>
-  <body class="d-flex align-items-center justify-content-center vh-100 bg-light">
-    <div class="card p-4 shadow" style="min-width:320px; max-width:420px; width:100%;">
-      <h4 class="mb-3 text-center">ورود به پنل</h4>
-      <form id="loginForm">
-        <div class="mb-3">
-          <label class="form-label">شماره تلفن</label>
-          <input id="phone" class="form-control" placeholder="مثال: 0912xxxxxxx" required>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ورود - سیستم مدیریت کلینیک</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .login-container {
+            max-width: 450px;
+            width: 100%;
+            padding: 20px;
+        }
+        .login-card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        .login-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px 30px;
+            text-align: center;
+        }
+        .login-header h3 {
+            margin: 0;
+            font-weight: bold;
+        }
+        .login-header p {
+            margin: 10px 0 0 0;
+            opacity: 0.9;
+        }
+        .login-body {
+            padding: 40px 30px;
+        }
+        .form-control:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        }
+        .btn-login {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            padding: 12px;
+            font-weight: bold;
+            transition: transform 0.2s;
+        }
+        .btn-login:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        .tab-buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+        .tab-btn {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #dee2e6;
+            background: white;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .tab-btn.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-color: #667eea;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.3s;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .icon-circle {
+            width: 80px;
+            height: 80px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+        }
+        .icon-circle i {
+            font-size: 40px;
+        }
+        .back-link {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .back-link a {
+            color: white;
+            text-decoration: none;
+            font-weight: 600;
+            transition: opacity 0.3s;
+        }
+        .back-link a:hover {
+            opacity: 0.8;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-card">
+            <div class="login-header">
+                <div class="icon-circle">
+                    <i class="bi bi-hospital"></i>
+                </div>
+                <h3>سیستم مدیریت کلینیک</h3>
+                <p>به سیستم خوش آمدید</p>
+            </div>
+            <div class="login-body">
+                <!-- Tab Buttons -->
+                <div class="tab-buttons">
+                    <button class="tab-btn active" onclick="switchTab('login')">
+                        <i class="bi bi-box-arrow-in-right"></i> ورود
+                    </button>
+                    <button class="tab-btn" onclick="switchTab('register')">
+                        <i class="bi bi-person-plus"></i> ثبت نام
+                    </button>
+                </div>
+
+                <!-- Login Tab -->
+                <div class="tab-content active" id="loginTab">
+                    <form id="loginForm">
+                        <div class="mb-3">
+                            <label class="form-label">شماره تلفن</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-phone"></i></span>
+                                <input type="tel" class="form-control" id="login_phone" maxlength="11" placeholder="09xxxxxxxxx" required>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">رمز عبور</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-lock"></i></span>
+                                <input type="password" class="form-control" id="login_password" placeholder="رمز عبور خود را وارد کنید" required>
+                            </div>
+                        </div>
+                        <div id="loginAlert" class="alert d-none"></div>
+                        <button type="submit" class="btn btn-login btn-primary w-100">
+                            <i class="bi bi-box-arrow-in-right"></i> ورود به سیستم
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Register Tab -->
+                <div class="tab-content" id="registerTab">
+                    <form id="registerForm">
+                        <div class="mb-3">
+                            <label class="form-label">نام و نام خانوادگی *</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-person"></i></span>
+                                <input type="text" class="form-control" id="reg_full_name" placeholder="نام کامل خود را وارد کنید" required minlength="2">
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">شماره تلفن *</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-phone"></i></span>
+                                <input type="tel" class="form-control" id="reg_phone" maxlength="11" minlength="11" placeholder="09xxxxxxxxx" required>
+                            </div>
+                            <small class="text-muted">شماره باید 11 رقم باشد</small>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">رمز عبور *</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-lock"></i></span>
+                                <input type="password" class="form-control" id="reg_password" placeholder="حداقل 6 کاراکتر" required minlength="6">
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">تکرار رمز عبور *</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-lock-fill"></i></span>
+                                <input type="password" class="form-control" id="reg_password_confirm" placeholder="رمز عبور را تکرار کنید" required minlength="6">
+                            </div>
+                        </div>
+                        <div id="registerAlert" class="alert d-none"></div>
+                        <button type="submit" class="btn btn-login btn-primary w-100">
+                            <i class="bi bi-person-plus"></i> ثبت نام
+                        </button>
+                    </form>
+                </div>
+            </div>
         </div>
-        <div class="mb-3">
-          <label class="form-label">رمز عبور</label>
-          <input id="password" type="password" class="form-control" required>
+        <div class="back-link">
+            <a href="index.html">
+                <i class="bi bi-arrow-right"></i> بازگشت به صفحه اصلی
+            </a>
         </div>
-        <div id="loginAlert" class="alert d-none" role="alert"></div>
-        <div class="d-flex justify-content-between align-items-center">
-          <button class="btn btn-primary" type="submit">ورود</button>
-          <a href="index.html" class="text-muted">بازگشت</a>
-        </div>
-      </form>
     </div>
 
-    <script src="api.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-      document.getElementById('loginForm').addEventListener('submit', async (e)=>{
-        e.preventDefault();
-        const phone = document.getElementById('phone').value.trim();
-        const password = document.getElementById('password').value.trim();
-        const alertDiv = document.getElementById('loginAlert');
-        try{
-          const data = await api.login({phone, password});
-          localStorage.setItem('access_token', data.access_token);
-          localStorage.setItem('refresh_token', data.refresh_token);
-          alertDiv.className = 'alert alert-success mt-3';
-          alertDiv.textContent = 'ورود موفق — درحال هدایت...';
-          setTimeout(()=>location.href='dashboard.html',800);
-        }catch(err){
-          alertDiv.className = 'alert alert-danger mt-3';
-          alertDiv.textContent = err.message || 'خطا در ورود';
+        const API_URL = 'http://localhost:1212';
+
+        // Tab Switching
+        function switchTab(tab) {
+            const tabs = document.querySelectorAll('.tab-content');
+            const buttons = document.querySelectorAll('.tab-btn');
+            
+            tabs.forEach(t => t.classList.remove('active'));
+            buttons.forEach(b => b.classList.remove('active'));
+            
+            if (tab === 'login') {
+                document.getElementById('loginTab').classList.add('active');
+                buttons[0].classList.add('active');
+            } else {
+                document.getElementById('registerTab').classList.add('active');
+                buttons[1].classList.add('active');
+            }
         }
-      });
+
+        // Login Form Handler
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const phone = document.getElementById('login_phone').value.trim();
+            const password = document.getElementById('login_password').value.trim();
+            const alertDiv = document.getElementById('loginAlert');
+
+            // Clear previous alerts
+            alertDiv.classList.add('d-none');
+
+            // Validation
+            if (phone.length !== 11) {
+                showAlert('loginAlert', 'danger', 'شماره تلفن باید 11 رقم باشد');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/api/v1/auth/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ phone_number: phone, password: password })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    localStorage.setItem('access_token', data.access_token);
+                    localStorage.setItem('refresh_token', data.refresh_token);
+                    localStorage.setItem('user', JSON.stringify(data.user));
+                    
+                    showAlert('loginAlert', 'success', 'ورود موفق! در حال انتقال...');
+                    
+                    setTimeout(() => {
+                        window.location.href = 'dashboard.html';
+                    }, 1000);
+                } else {
+                    const error = await response.json();
+                    showAlert('loginAlert', 'danger', error.detail || 'شماره تلفن یا رمز عبور اشتباه است');
+                }
+            } catch (error) {
+                showAlert('loginAlert', 'danger', 'خطا در اتصال به سرور. لطفا دوباره تلاش کنید');
+            }
+        });
+
+        // Register Form Handler
+        document.getElementById('registerForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const fullName = document.getElementById('reg_full_name').value.trim();
+            const phone = document.getElementById('reg_phone').value.trim();
+            const password = document.getElementById('reg_password').value.trim();
+            const passwordConfirm = document.getElementById('reg_password_confirm').value.trim();
+            const alertDiv = document.getElementById('registerAlert');
+
+            // Clear previous alerts
+            alertDiv.classList.add('d-none');
+
+            // Validation
+            if (fullName.length < 2) {
+                showAlert('registerAlert', 'danger', 'نام باید حداقل 2 کاراکتر باشد');
+                return;
+            }
+
+            if (phone.length !== 11) {
+                showAlert('registerAlert', 'danger', 'شماره تلفن باید 11 رقم باشد');
+                return;
+            }
+
+            if (!/^09\d{9}$/.test(phone)) {
+                showAlert('registerAlert', 'danger', 'شماره تلفن باید با 09 شروع شود');
+                return;
+            }
+
+            if (password.length < 6) {
+                showAlert('registerAlert', 'danger', 'رمز عبور باید حداقل 6 کاراکتر باشد');
+                return;
+            }
+
+            if (password !== passwordConfirm) {
+                showAlert('registerAlert', 'danger', 'رمز عبور و تکرار آن یکسان نیستند');
+                return;
+            }
+
+            try {
+                // Create user
+                const userResponse = await fetch(`${API_URL}/api/v1/users/users/`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        phone_number: phone,
+                        full_name: fullName,
+                        password: password,
+                        role: 'Patient'
+                    })
+                });
+
+                if (!userResponse.ok) {
+                    const error = await userResponse.json();
+                    if (error.detail && error.detail.includes('duplicate')) {
+                        throw new Error('این شماره تلفن قبلا ثبت شده است');
+                    }
+                    throw new Error(error.detail || 'خطا در ثبت نام');
+                }
+
+                const userData = await userResponse.json();
+
+                // Create patient profile
+                const patientResponse = await fetch(`${API_URL}/api/v1/patients/patients/`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        user_id: userData.id
+                    })
+                });
+
+                if (!patientResponse.ok) {
+                    throw new Error('خطا در ایجاد پروفایل بیمار');
+                }
+
+                // Show success message
+                showAlert('registerAlert', 'success', 'ثبت نام با موفقیت انجام شد! در حال ورود خودکار...');
+                
+                // Auto login after 1.5 seconds
+                setTimeout(async () => {
+                    try {
+                        const loginResponse = await fetch(`${API_URL}/api/v1/auth/auth/login`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ phone_number: phone, password: password })
+                        });
+
+                        if (loginResponse.ok) {
+                            const loginData = await loginResponse.json();
+                            localStorage.setItem('access_token', loginData.access_token);
+                            localStorage.setItem('refresh_token', loginData.refresh_token);
+                            localStorage.setItem('user', JSON.stringify(loginData.user));
+                            window.location.href = 'dashboard.html';
+                        } else {
+                            showAlert('registerAlert', 'info', 'ثبت نام موفق بود. لطفا وارد شوید');
+                            setTimeout(() => switchTab('login'), 2000);
+                        }
+                    } catch (error) {
+                        showAlert('registerAlert', 'info', 'ثبت نام موفق بود. لطفا وارد شوید');
+                        setTimeout(() => switchTab('login'), 2000);
+                    }
+                }, 1500);
+
+            } catch (error) {
+                showAlert('registerAlert', 'danger', error.message || 'خطا در ثبت نام');
+            }
+        });
+
+        // Helper function to show alerts
+        function showAlert(elementId, type, message) {
+            const alertDiv = document.getElementById(elementId);
+            alertDiv.className = `alert alert-${type}`;
+            alertDiv.textContent = message;
+            alertDiv.classList.remove('d-none');
+            
+            // Auto hide success messages after 5 seconds
+            if (type === 'success') {
+                setTimeout(() => {
+                    alertDiv.classList.add('d-none');
+                }, 5000);
+            }
+        }
+
+        // Check if already logged in
+        if (localStorage.getItem('access_token')) {
+            window.location.href = 'dashboard.html';
+        }
     </script>
-  </body>
+</body>
 </html>
