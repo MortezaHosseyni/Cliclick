@@ -22,16 +22,14 @@
             <h5 class="text-white"><i class="bi bi-hospital"></i> کلینیک</h5>
             <p class="text-white-50 small" id="userName"></p>
         </div>
-        <a href="dashboard.html" class="active"><i class="bi bi-speedometer2"></i> داشبورد</a>
+        <a href="dashboard.html"  class="active"><i class="bi bi-speedometer2"></i> داشبورد</a>
         <a href="patients.html" id="patientsLink"><i class="bi bi-people"></i> بیماران</a>
         <a href="appointments.html"><i class="bi bi-calendar-check"></i> نوبت‌ها</a>
         <a href="prescriptions.html"><i class="bi bi-prescription2"></i> نسخه‌ها</a>
         <a href="medications.html" id="medicationsLink"><i class="bi bi-capsule"></i> داروها</a>
         <a href="factors.html"><i class="bi bi-file-earmark-medical"></i> فاکتورها</a>
         <a href="insurance.html"><i class="bi bi-shield-check"></i> بیمه</a>
-        <a href="support.html"><i class="bi bi-chat-dots"></i> پشتیبانی</a>
         <a href="reports.html" id="reportsLink"><i class="bi bi-graph-up"></i> گزارشات</a>
-        <a href="settings.html" id="settingsLink"><i class="bi bi-gear"></i> تنظیمات</a>
         <hr class="bg-white">
         <a href="#" onclick="logout()"><i class="bi bi-box-arrow-right"></i> خروج</a>
     </div>
@@ -140,8 +138,8 @@
                             <button class="btn btn-outline-info" onclick="location.href='prescriptions.html'">
                                 <i class="bi bi-file-plus"></i> نسخه جدید
                             </button>
-                            <button class="btn btn-outline-warning" onclick="location.href='support.html'">
-                                <i class="bi bi-chat"></i> پشتیبانی
+                            <button class="btn btn-outline-warning" onclick="location.href='reports.html'">
+                                <i class="bi bi-chat"></i> گزارشات
                             </button>
                         </div>
                     </div>
@@ -156,9 +154,9 @@
         let token = localStorage.getItem('access_token');
         let user = JSON.parse(localStorage.getItem('user') || '{}');
 
-        // if (!token) {
-        //     window.location.href = 'index.html';
-        // }
+        if (!token) {
+            window.location.href = 'index.html';
+        }
 
         document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('userName').textContent = user.full_name;
@@ -173,7 +171,6 @@
                 document.getElementById('patientsLink').style.display = 'none';
                 document.getElementById('medicationsLink').style.display = 'none';
                 document.getElementById('reportsLink').style.display = 'none';
-                document.getElementById('settingsLink').style.display = 'none';
                 document.getElementById('newPatientBtn').style.display = 'none';
                 document.getElementById('statsSection').style.display = 'none';
             }

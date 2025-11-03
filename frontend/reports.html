@@ -1,0 +1,1030 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>گزارشات - سیستم مدیریت کلینیک</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+
+        .sidebar {
+            height: 100vh;
+            position: fixed;
+            right: 0;
+            top: 0;
+            width: 250px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding-top: 20px;
+            overflow-y: auto;
+        }
+
+        .sidebar a {
+            color: white;
+            text-decoration: none;
+            padding: 12px 20px;
+            display: block;
+            transition: 0.3s;
+        }
+
+        .sidebar a:hover,
+        .sidebar a.active {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .main-content {
+            margin-right: 250px;
+            padding: 20px;
+        }
+
+        .report-card {
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .report-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .report-icon {
+            font-size: 3rem;
+            opacity: 0.8;
+        }
+
+        .filter-section {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .table-responsive {
+            max-height: 600px;
+            overflow-y: auto;
+        }
+
+        .stat-badge {
+            padding: 8px 12px;
+            border-radius: 5px;
+        }
+
+        .loading-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .loading-overlay.show {
+            display: flex;
+        }
+
+        .spinner-border {
+            width: 3rem;
+            height: 3rem;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="spinner-border text-light" role="status">
+            <span class="visually-hidden">در حال بارگذاری...</span>
+        </div>
+    </div>
+
+    <div class="sidebar">
+        <div class="text-center mb-4">
+            <h5 class="text-white"><i class="bi bi-hospital"></i> کلینیک</h5>
+            <p class="text-white-50 small" id="userName"></p>
+        </div>
+        <a href="dashboard.html"><i class="bi bi-speedometer2"></i> داشبورد</a>
+        <a href="patients.html" id="patientsLink"><i class="bi bi-people"></i> بیماران</a>
+        <a href="appointments.html"><i class="bi bi-calendar-check"></i> نوبت‌ها</a>
+        <a href="prescriptions.html"><i class="bi bi-prescription2"></i> نسخه‌ها</a>
+        <a href="medications.html" id="medicationsLink"><i class="bi bi-capsule"></i> داروها</a>
+        <a href="factors.html"><i class="bi bi-file-earmark-medical"></i> فاکتورها</a>
+        <a href="insurance.html"><i class="bi bi-shield-check"></i> بیمه</a>
+        <a href="reports.html" id="reportsLink" class="active"><i class="bi bi-graph-up"></i> گزارشات</a>
+        <hr class="bg-white">
+        <a href="#" onclick="logout()"><i class="bi bi-box-arrow-right"></i> خروج</a>
+    </div>
+
+    <div class="main-content">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2><i class="bi bi-graph-up"></i> گزارشات پیشرفته</h2>
+            <span class="badge bg-success" id="userRole"></span>
+        </div>
+
+        <!-- Report Selection Cards -->
+        <div id="reportSelection">
+            <div class="row g-3 mb-4">
+                <div class="col-md-4">
+                    <div class="card report-card" onclick="showReport('patients')">
+                        <div class="card-body text-center">
+                            <i class="bi bi-people-fill report-icon text-primary"></i>
+                            <h5 class="mt-3">گزارش بیماران</h5>
+                            <p class="text-muted">گزارش تفصیلی بیماران با فعالیت‌ها</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card report-card" onclick="showReport('factors')">
+                        <div class="card-body text-center">
+                            <i class="bi bi-file-earmark-medical-fill report-icon text-success"></i>
+                            <h5 class="mt-3">گزارش فاکتورها</h5>
+                            <p class="text-muted">گزارش تفصیلی تزریقات فاکتور</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card report-card" onclick="showReport('prescriptions')">
+                        <div class="card-body text-center">
+                            <i class="bi bi-prescription2 report-icon text-info"></i>
+                            <h5 class="mt-3">گزارش نسخه‌ها</h5>
+                            <p class="text-muted">گزارش تفصیلی نسخه‌های پزشکی</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card report-card" onclick="showReport('appointments')">
+                        <div class="card-body text-center">
+                            <i class="bi bi-calendar-check-fill report-icon text-warning"></i>
+                            <h5 class="mt-3">گزارش نوبت‌ها</h5>
+                            <p class="text-muted">گزارش تفصیلی نوبت‌های ملاقات</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card report-card" onclick="showReport('patient-detail')">
+                        <div class="card-body text-center">
+                            <i class="bi bi-person-badge-fill report-icon text-danger"></i>
+                            <h5 class="mt-3">گزارش یک بیمار</h5>
+                            <p class="text-muted">گزارش جامع برای یک بیمار خاص</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Patients Report -->
+        <div id="patientsReport" style="display: none;">
+            <button class="btn btn-secondary mb-3" onclick="backToSelection()">
+                <i class="bi bi-arrow-right"></i> بازگشت
+            </button>
+
+            <div class="filter-section">
+                <h5 class="mb-3">فیلترها</h5>
+                <div class="row g-3">
+                    <div class="col-md-3">
+                        <label class="form-label">از تاریخ</label>
+                        <input type="date" class="form-control" id="patientsStartDate">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">تا تاریخ</label>
+                        <input type="date" class="form-control" id="patientsEndDate">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">وضعیت بیمه</label>
+                        <select class="form-select" id="patientsInsurance">
+                            <option value="">همه</option>
+                            <option value="true">دارای بیمه</option>
+                            <option value="false">بدون بیمه</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">حداقل نوبت‌ها</label>
+                        <input type="number" class="form-control" id="patientsMinAppts" placeholder="0">
+                    </div>
+                    <div class="col-12">
+                        <button class="btn btn-primary" onclick="loadPatientsReport()">
+                            <i class="bi bi-search"></i> اعمال فیلتر
+                        </button>
+                        <button class="btn btn-success" onclick="exportPatientsCsv()">
+                            <i class="bi bi-file-earmark-spreadsheet"></i> خروجی CSV
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-light sticky-top">
+                                <tr>
+                                    <th>شناسه</th>
+                                    <th>نام کامل</th>
+                                    <th>تلفن</th>
+                                    <th>سن</th>
+                                    <th>جنسیت</th>
+                                    <th>گروه خونی</th>
+                                    <th>نوبت‌ها</th>
+                                    <th>نسخه‌ها</th>
+                                    <th>فاکتورها</th>
+                                    <th>بیمه</th>
+                                </tr>
+                            </thead>
+                            <tbody id="patientsTableBody">
+                                <tr>
+                                    <td colspan="10" class="text-center">در حال بارگذاری...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Factors Report -->
+        <div id="factorsReport" style="display: none;">
+            <button class="btn btn-secondary mb-3" onclick="backToSelection()">
+                <i class="bi bi-arrow-right"></i> بازگشت
+            </button>
+
+            <div class="filter-section">
+                <h5 class="mb-3">فیلترها</h5>
+                <div class="row g-3">
+                    <div class="col-md-3">
+                        <label class="form-label">از تاریخ</label>
+                        <input type="date" class="form-control" id="factorsStartDate">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">تا تاریخ</label>
+                        <input type="date" class="form-control" id="factorsEndDate">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">نوع فاکتور</label>
+                        <input type="text" class="form-control" id="factorsType" placeholder="مثلا Factor VIII">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">حداقل واحدها</label>
+                        <input type="number" class="form-control" id="factorsMinUnits" placeholder="0">
+                    </div>
+                    <div class="col-12">
+                        <button class="btn btn-primary" onclick="loadFactorsReport()">
+                            <i class="bi bi-search"></i> اعمال فیلتر
+                        </button>
+                        <button class="btn btn-success" onclick="exportFactorsCsv()">
+                            <i class="bi bi-file-earmark-spreadsheet"></i> خروجی CSV
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-light sticky-top">
+                                <tr>
+                                    <th>شناسه</th>
+                                    <th>بیمار</th>
+                                    <th>تلفن</th>
+                                    <th>نوع فاکتور</th>
+                                    <th>واحدها</th>
+                                    <th>تاریخ</th>
+                                    <th>شماره دسته</th>
+                                    <th>تزریق توسط</th>
+                                    <th>هزینه</th>
+                                </tr>
+                            </thead>
+                            <tbody id="factorsTableBody">
+                                <tr>
+                                    <td colspan="9" class="text-center">در حال بارگذاری...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Prescriptions Report -->
+        <div id="prescriptionsReport" style="display: none;">
+            <button class="btn btn-secondary mb-3" onclick="backToSelection()">
+                <i class="bi bi-arrow-right"></i> بازگشت
+            </button>
+
+            <div class="filter-section">
+                <h5 class="mb-3">فیلترها</h5>
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <label class="form-label">از تاریخ</label>
+                        <input type="date" class="form-control" id="prescriptionsStartDate">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">تا تاریخ</label>
+                        <input type="date" class="form-control" id="prescriptionsEndDate">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">نام دارو</label>
+                        <input type="text" class="form-control" id="prescriptionsMedName" placeholder="جستجو در داروها">
+                    </div>
+                    <div class="col-12">
+                        <button class="btn btn-primary" onclick="loadPrescriptionsReport()">
+                            <i class="bi bi-search"></i> اعمال فیلتر
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-body">
+                    <div id="prescriptionsContainer"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Appointments Report -->
+        <div id="appointmentsReport" style="display: none;">
+            <button class="btn btn-secondary mb-3" onclick="backToSelection()">
+                <i class="bi bi-arrow-right"></i> بازگشت
+            </button>
+
+            <div class="filter-section">
+                <h5 class="mb-3">فیلترها</h5>
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <label class="form-label">از تاریخ</label>
+                        <input type="date" class="form-control" id="appointmentsStartDate">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">تا تاریخ</label>
+                        <input type="date" class="form-control" id="appointmentsEndDate">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">وضعیت</label>
+                        <select class="form-select" id="appointmentsStatus">
+                            <option value="">همه</option>
+                            <option value="Pending">در انتظار</option>
+                            <option value="Confirmed">تایید شده</option>
+                            <option value="Completed">انجام شده</option>
+                            <option value="Canceled">لغو شده</option>
+                        </select>
+                    </div>
+                    <div class="col-12">
+                        <button class="btn btn-primary" onclick="loadAppointmentsReport()">
+                            <i class="bi bi-search"></i> اعمال فیلتر
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-light sticky-top">
+                                <tr>
+                                    <th>شناسه</th>
+                                    <th>بیمار</th>
+                                    <th>تلفن</th>
+                                    <th>تاریخ نوبت</th>
+                                    <th>وضعیت</th>
+                                    <th>دلیل</th>
+                                    <th>یادداشت</th>
+                                </tr>
+                            </thead>
+                            <tbody id="appointmentsTableBody">
+                                <tr>
+                                    <td colspan="7" class="text-center">در حال بارگذاری...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Patient Detail Report -->
+        <div id="patientDetailReport" style="display: none;">
+            <button class="btn btn-secondary mb-3" onclick="backToSelection()">
+                <i class="bi bi-arrow-right"></i> بازگشت
+            </button>
+
+            <div class="filter-section">
+                <h5 class="mb-3">انتخاب بیمار</h5>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label">شناسه بیمار</label>
+                        <input type="number" class="form-control" id="patientDetailId"
+                            placeholder="شناسه بیمار را وارد کنید">
+                    </div>
+                    <div class="col-md-6 d-flex align-items-end">
+                        <button class="btn btn-primary" onclick="loadPatientDetail()">
+                            <i class="bi bi-search"></i> نمایش گزارش
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="patientDetailContainer"></div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const API_URL = 'http://localhost:1212';
+        let token = localStorage.getItem('access_token');
+        let user = JSON.parse(localStorage.getItem('user') || '{}');
+
+        if (!token) {
+            window.location.href = 'index.html';
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            document.getElementById('userName').textContent = user.full_name;
+            document.getElementById('userRole').textContent = getRoleName(user.role);
+
+            if (user.role === 'Patient') {
+                window.location.href = 'dashboard.html';
+            }
+        });
+
+        function getRoleName(role) {
+            const roles = { 'Admin': 'مدیر', 'Secretary': 'منشی', 'Patient': 'بیمار' };
+            return roles[role] || role;
+        }
+
+        function showReport(type) {
+            document.getElementById('reportSelection').style.display = 'none';
+            document.getElementById('patientsReport').style.display = 'none';
+            document.getElementById('factorsReport').style.display = 'none';
+            document.getElementById('prescriptionsReport').style.display = 'none';
+            document.getElementById('appointmentsReport').style.display = 'none';
+            document.getElementById('patientDetailReport').style.display = 'none';
+
+            switch (type) {
+                case 'patients':
+                    document.getElementById('patientsReport').style.display = 'block';
+                    loadPatientsReport();
+                    break;
+                case 'factors':
+                    document.getElementById('factorsReport').style.display = 'block';
+                    loadFactorsReport();
+                    break;
+                case 'prescriptions':
+                    document.getElementById('prescriptionsReport').style.display = 'block';
+                    loadPrescriptionsReport();
+                    break;
+                case 'appointments':
+                    document.getElementById('appointmentsReport').style.display = 'block';
+                    loadAppointmentsReport();
+                    break;
+                case 'patient-detail':
+                    document.getElementById('patientDetailReport').style.display = 'block';
+                    break;
+            }
+        }
+
+        function backToSelection() {
+            document.getElementById('reportSelection').style.display = 'block';
+            document.getElementById('patientsReport').style.display = 'none';
+            document.getElementById('factorsReport').style.display = 'none';
+            document.getElementById('prescriptionsReport').style.display = 'none';
+            document.getElementById('appointmentsReport').style.display = 'none';
+            document.getElementById('patientDetailReport').style.display = 'none';
+        }
+
+        async function loadPatientsReport() {
+            showLoading();
+            const startDate = document.getElementById('patientsStartDate').value;
+            const endDate = document.getElementById('patientsEndDate').value;
+            const hasInsurance = document.getElementById('patientsInsurance').value;
+            const minAppts = document.getElementById('patientsMinAppts').value;
+
+            let url = '/api/v1/reports/reports/advanced/patients?';
+            if (startDate) url += `start_date=${startDate}&`;
+            if (endDate) url += `end_date=${endDate}&`;
+            if (hasInsurance) url += `has_insurance=${hasInsurance}&`;
+            if (minAppts) url += `min_appointments=${minAppts}&`;
+
+            try {
+                const data = await apiCall(url);
+                const tbody = document.getElementById('patientsTableBody');
+
+                if (data && data.length > 0) {
+                    tbody.innerHTML = data.map(p => `
+                        <tr>
+                            <td>${p.patient_id}</td>
+                            <td>${p.full_name}</td>
+                            <td>${p.phone_number}</td>
+                            <td>${p.age || '-'}</td>
+                            <td>${p.gender || '-'}</td>
+                            <td>${p.blood_type || '-'}</td>
+                            <td>
+                                <span class="badge bg-info">${p.total_appointments}</span>
+                                <small class="text-success">(${p.completed_appointments} تکمیل)</small>
+                            </td>
+                            <td><span class="badge bg-primary">${p.total_prescriptions}</span></td>
+                            <td>
+                                <span class="badge bg-warning text-dark">${p.total_factors}</span>
+                                <small>(${p.total_factor_units} واحد)</small>
+                            </td>
+                            <td>
+                                ${p.has_insurance ?
+                            `<span class="badge bg-success"><i class="bi bi-check-circle"></i> ${p.insurance_company}</span>` :
+                            `<span class="badge bg-secondary">ندارد</span>`}
+                            </td>
+                        </tr>
+                    `).join('');
+                } else {
+                    tbody.innerHTML = '<tr><td colspan="10" class="text-center">داده‌ای یافت نشد</td></tr>';
+                }
+            } catch (error) {
+                document.getElementById('patientsTableBody').innerHTML = '<tr><td colspan="10" class="text-center text-danger">خطا در بارگذاری اطلاعات</td></tr>';
+            }
+            hideLoading();
+        }
+
+        async function loadFactorsReport() {
+            showLoading();
+            const startDate = document.getElementById('factorsStartDate').value;
+            const endDate = document.getElementById('factorsEndDate').value;
+            const factorType = document.getElementById('factorsType').value;
+            const minUnits = document.getElementById('factorsMinUnits').value;
+
+            let url = '/api/v1/reports/reports/advanced/factors?';
+            if (startDate) url += `start_date=${startDate}&`;
+            if (endDate) url += `end_date=${endDate}&`;
+            if (factorType) url += `factor_type=${factorType}&`;
+            if (minUnits) url += `min_units=${minUnits}&`;
+
+            try {
+                const data = await apiCall(url);
+                const tbody = document.getElementById('factorsTableBody');
+
+                if (data && data.length > 0) {
+                    tbody.innerHTML = data.map(f => `
+                        <tr>
+                            <td>${f.factor_id}</td>
+                            <td>${f.patient_name}</td>
+                            <td>${f.patient_phone}</td>
+                            <td><span class="badge bg-info">${f.factor_type}</span></td>
+                            <td><strong>${f.units_administered}</strong> واحد</td>
+                            <td>${formatDateTime(f.administration_date)}</td>
+                            <td>${f.lot_number || '-'}</td>
+                            <td>${f.administered_by || '-'}</td>
+                            <td>${f.cost ? formatCurrency(f.cost) : '-'}</td>
+                        </tr>
+                    `).join('');
+                } else {
+                    tbody.innerHTML = '<tr><td colspan="9" class="text-center">داده‌ای یافت نشد</td></tr>';
+                }
+            } catch (error) {
+                document.getElementById('factorsTableBody').innerHTML = '<tr><td colspan="9" class="text-center text-danger">خطا در بارگذاری اطلاعات</td></tr>';
+            }
+            hideLoading();
+        }
+
+        async function loadPrescriptionsReport() {
+            showLoading();
+            const startDate = document.getElementById('prescriptionsStartDate').value;
+            const endDate = document.getElementById('prescriptionsEndDate').value;
+            const medName = document.getElementById('prescriptionsMedName').value;
+
+            let url = '/api/v1/reports/reports/advanced/prescriptions?';
+            if (startDate) url += `start_date=${startDate}&`;
+            if (endDate) url += `end_date=${endDate}&`;
+            if (medName) url += `medication_name=${medName}&`;
+
+            try {
+                const data = await apiCall(url);
+                const container = document.getElementById('prescriptionsContainer');
+
+                if (data && data.length > 0) {
+                    container.innerHTML = data.map(p => `
+                        <div class="card mb-3">
+                            <div class="card-header bg-light">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <strong>نسخه #${p.prescription_id}</strong> - ${p.patient_name}
+                                        <br><small class="text-muted">${p.patient_phone}</small>
+                                    </div>
+                                    <div class="col-md-6 text-end">
+                                        <span class="badge bg-primary">${p.total_medications} دارو</span>
+                                        <br><small class="text-muted">${formatDateTime(p.created_at)}</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <p><strong>پزشک:</strong> ${p.doctor_name || '-'}</p>
+                                <p><strong>تشخیص:</strong> ${p.diagnosis || '-'}</p>
+                                <h6 class="mt-3">داروها:</h6>
+                                <table class="table table-sm">
+                                    <thead>
+                                        <tr>
+                                            <th>نام دارو</th>
+                                            <th>دوز</th>
+                                            <th>مدت</th>
+                                            <th>تعداد</th>
+                                            <th>دستورالعمل</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        ${p.medications.map(m => `
+                                            <tr>
+                                                <td>${m.medication_name}</td>
+                                                <td>${m.dosage || '-'}</td>
+                                                <td>${m.duration || '-'}</td>
+                                                <td>${m.quantity || '-'}</td>
+                                                <td>${m.instructions || '-'}</td>
+                                            </tr>
+                                        `).join('')}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    `).join('');
+                } else {
+                    container.innerHTML = '<p class="text-center">داده‌ای یافت نشد</p>';
+                }
+            } catch (error) {
+                document.getElementById('prescriptionsContainer').innerHTML = '<p class="text-center text-danger">خطا در بارگذاری اطلاعات</p>';
+            }
+            hideLoading();
+        }
+
+        async function loadAppointmentsReport() {
+            showLoading();
+            const startDate = document.getElementById('appointmentsStartDate').value;
+            const endDate = document.getElementById('appointmentsEndDate').value;
+            const status = document.getElementById('appointmentsStatus').value;
+
+            let url = '/api/v1/reports/reports/advanced/appointments?';
+            if (startDate) url += `start_date=${startDate}&`;
+            if (endDate) url += `end_date=${endDate}&`;
+            if (status) url += `status=${status}&`;
+
+            try {
+                const data = await apiCall(url);
+                const tbody = document.getElementById('appointmentsTableBody');
+
+                if (data && data.length > 0) {
+                    tbody.innerHTML = data.map(a => `
+                        <tr>
+                            <td>${a.appointment_id}</td>
+                            <td>${a.patient_name}</td>
+                            <td>${a.patient_phone}</td>
+                            <td>${formatDateTime(a.appointment_date)}</td>
+                            <td><span class="badge bg-${getStatusColor(a.status)}">${getStatusText(a.status)}</span></td>
+                            <td>${a.reason || '-'}</td>
+                            <td>${a.notes || '-'}</td>
+                        </tr>
+                    `).join('');
+                } else {
+                    tbody.innerHTML = '<tr><td colspan="7" class="text-center">داده‌ای یافت نشد</td></tr>';
+                }
+            } catch (error) {
+                document.getElementById('appointmentsTableBody').innerHTML = '<tr><td colspan="7" class="text-center text-danger">خطا در بارگذاری اطلاعات</td></tr>';
+            }
+            hideLoading();
+        }
+
+        async function loadPatientDetail() {
+            const patientId = document.getElementById('patientDetailId').value;
+            if (!patientId) {
+                alert('لطفا شناسه بیمار را وارد کنید');
+                return;
+            }
+
+            showLoading();
+            try {
+                const data = await apiCall(`/api/v1/reports/reports/advanced/patient/${patientId}`);
+                const container = document.getElementById('patientDetailContainer');
+
+                if (data) {
+                    container.innerHTML = `
+                        <div class="row g-3 mt-3">
+                            <!-- Basic Info -->
+                            <div class="col-md-6">
+                                <div class="card">
+                                    <div class="card-header bg-primary text-white">
+                                        <h5 class="mb-0"><i class="bi bi-person-circle"></i> اطلاعات پایه</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <p><strong>نام:</strong> ${data.full_name}</p>
+                                        <p><strong>تلفن:</strong> ${data.phone_number}</p>
+                                        <p><strong>کد ملی:</strong> ${data.national_code || '-'}</p>
+                                        <p><strong>تاریخ تولد:</strong> ${data.date_of_birth || '-'}</p>
+                                        <p><strong>سن:</strong> ${data.age || '-'} سال</p>
+                                        <p><strong>جنسیت:</strong> ${data.gender || '-'}</p>
+                                        <p><strong>گروه خونی:</strong> ${data.blood_type || '-'}</p>
+                                        <p><strong>آدرس:</strong> ${data.address || '-'}</p>
+                                        <p><strong>تماس اضطراری:</strong> ${data.emergency_contact || '-'}</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Insurance Info -->
+                            <div class="col-md-6">
+                                <div class="card">
+                                    <div class="card-header bg-success text-white">
+                                        <h5 class="mb-0"><i class="bi bi-shield-check"></i> اطلاعات بیمه</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        ${data.has_insurance ? `
+                                            <p><strong>شرکت بیمه:</strong> ${data.insurance_company}</p>
+                                            <p><strong>شماره بیمه‌نامه:</strong> ${data.policy_number || '-'}</p>
+                                            <p><strong>نوع پوشش:</strong> ${data.coverage_type || '-'}</p>
+                                        ` : '<p class="text-muted">بیمه‌ای ثبت نشده است</p>'}
+                                    </div>
+                                </div>
+
+                                <!-- Appointment Stats -->
+                                <div class="card mt-3">
+                                    <div class="card-header bg-info text-white">
+                                        <h5 class="mb-0"><i class="bi bi-calendar-check"></i> آمار نوبت‌ها</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row text-center">
+                                            <div class="col-6 mb-2">
+                                                <div class="stat-badge bg-light">
+                                                    <h4>${data.total_appointments}</h4>
+                                                    <small>کل نوبت‌ها</small>
+                                                </div>
+                                            </div>
+                                            <div class="col-6 mb-2">
+                                                <div class="stat-badge bg-light">
+                                                    <h4>${data.completed_appointments}</h4>
+                                                    <small>انجام شده</small>
+                                                </div>
+                                            </div>
+                                            <div class="col-6">
+                                                <div class="stat-badge bg-light">
+                                                    <h4>${data.pending_appointments}</h4>
+                                                    <small>در انتظار</small>
+                                                </div>
+                                            </div>
+                                            <div class="col-6">
+                                                <div class="stat-badge bg-light">
+                                                    <h4>${data.canceled_appointments}</h4>
+                                                    <small>لغو شده</small>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Medical History -->
+                            ${data.medical_history ? `
+                            <div class="col-12">
+                                <div class="card">
+                                    <div class="card-header bg-warning">
+                                        <h5 class="mb-0"><i class="bi bi-clipboard-pulse"></i> سابقه پزشکی</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <p>${data.medical_history}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            ` : ''}
+
+                            <!-- Upcoming Appointments -->
+                            ${data.upcoming_appointments.length > 0 ? `
+                            <div class="col-md-6">
+                                <div class="card">
+                                    <div class="card-header bg-light">
+                                        <h5 class="mb-0"><i class="bi bi-calendar3"></i> نوبت‌های آینده</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <ul class="list-group">
+                                            ${data.upcoming_appointments.map(a => `
+                                                <li class="list-group-item">
+                                                    <div class="d-flex justify-content-between">
+                                                        <span>${formatDateTime(a.date)}</span>
+                                                        <span class="badge bg-${getStatusColor(a.status)}">${getStatusText(a.status)}</span>
+                                                    </div>
+                                                    <small class="text-muted">${a.reason || 'بدون دلیل'}</small>
+                                                </li>
+                                            `).join('')}
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                            ` : ''}
+
+                            <!-- Prescription Summary -->
+                            <div class="col-md-6">
+                                <div class="card">
+                                    <div class="card-header bg-light">
+                                        <h5 class="mb-0"><i class="bi bi-prescription2"></i> خلاصه نسخه‌ها</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row text-center mb-3">
+                                            <div class="col-6">
+                                                <h3>${data.total_prescriptions}</h3>
+                                                <small>کل نسخه‌ها</small>
+                                            </div>
+                                            <div class="col-6">
+                                                <h3>${data.unique_medications}</h3>
+                                                <small>داروهای منحصر</small>
+                                            </div>
+                                        </div>
+                                        ${data.recent_prescriptions.length > 0 ? `
+                                            <h6 class="border-top pt-2">آخرین نسخه‌ها:</h6>
+                                            ${data.recent_prescriptions.map(p => `
+                                                <div class="border-bottom pb-2 mb-2">
+                                                    <small class="text-muted">${formatDateTime(p.created_at)}</small>
+                                                    <br><strong>${p.doctor_name || 'پزشک نامشخص'}</strong>
+                                                    <br><span class="badge bg-primary">${p.medications.length} دارو</span>
+                                                </div>
+                                            `).join('')}
+                                        ` : '<p class="text-muted">نسخه‌ای ثبت نشده</p>'}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Factor Treatment Summary -->
+                            <div class="col-12">
+                                <div class="card">
+                                    <div class="card-header bg-light">
+                                        <h5 class="mb-0"><i class="bi bi-file-earmark-medical"></i> خلاصه درمان فاکتوری</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row text-center mb-3">
+                                            <div class="col-md-4">
+                                                <h3>${data.total_factor_administrations}</h3>
+                                                <small>تعداد تزریقات</small>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <h3>${data.total_factor_units}</h3>
+                                                <small>کل واحدها</small>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <h3>${formatCurrency(data.total_factor_cost)}</h3>
+                                                <small>هزینه کل</small>
+                                            </div>
+                                        </div>
+                                        ${data.recent_factors.length > 0 ? `
+                                            <h6 class="border-top pt-2">آخرین تزریقات:</h6>
+                                            <div class="table-responsive">
+                                                <table class="table table-sm">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>نوع</th>
+                                                            <th>واحدها</th>
+                                                            <th>تاریخ</th>
+                                                            <th>توسط</th>
+                                                            <th>هزینه</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        ${data.recent_factors.map(f => `
+                                                            <tr>
+                                                                <td>${f.factor_type}</td>
+                                                                <td>${f.units}</td>
+                                                                <td>${formatDateTime(f.date)}</td>
+                                                                <td>${f.administered_by || '-'}</td>
+                                                                <td>${f.cost ? formatCurrency(f.cost) : '-'}</td>
+                                                            </tr>
+                                                        `).join('')}
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        ` : '<p class="text-muted">تزریقی ثبت نشده</p>'}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                document.getElementById('patientDetailContainer').innerHTML = '<div class="alert alert-danger">خطا در بارگذاری اطلاعات بیمار</div>';
+            }
+            hideLoading();
+        }
+
+        async function exportPatientsCsv() {
+            showLoading();
+            const startDate = document.getElementById('patientsStartDate').value;
+            const endDate = document.getElementById('patientsEndDate').value;
+
+            let url = '/api/v1/reports/reports/advanced/export/patients-csv?';
+            if (startDate) url += `start_date=${startDate}&`;
+            if (endDate) url += `end_date=${endDate}&`;
+
+            try {
+                const response = await fetch(`${API_URL}${url}`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (response.ok) {
+                    const blob = await response.blob();
+                    const downloadUrl = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = downloadUrl;
+                    a.download = `patients_report_${new Date().toISOString().split('T')[0]}.csv`;
+                    document.body.appendChild(a);
+                    a.click();
+                    a.remove();
+                } else {
+                    alert('خطا در دریافت فایل CSV');
+                }
+            } catch (error) {
+                alert('خطا در دریافت فایل CSV');
+            }
+            hideLoading();
+        }
+
+        async function exportFactorsCsv() {
+            showLoading();
+            const startDate = document.getElementById('factorsStartDate').value;
+            const endDate = document.getElementById('factorsEndDate').value;
+
+            let url = '/api/v1/reports/reports/advanced/export/factors-csv?';
+            if (startDate) url += `start_date=${startDate}&`;
+            if (endDate) url += `end_date=${endDate}&`;
+
+            try {
+                const response = await fetch(`${API_URL}${url}`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (response.ok) {
+                    const blob = await response.blob();
+                    const downloadUrl = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = downloadUrl;
+                    a.download = `factors_report_${new Date().toISOString().split('T')[0]}.csv`;
+                    document.body.appendChild(a);
+                    a.click();
+                    a.remove();
+                } else {
+                    alert('خطا در دریافت فایل CSV');
+                }
+            } catch (error) {
+                alert('خطا در دریافت فایل CSV');
+            }
+            hideLoading();
+        }
+
+        function getStatusColor(status) {
+            const colors = { 'Pending': 'warning', 'Confirmed': 'info', 'Completed': 'success', 'Canceled': 'danger' };
+            return colors[status] || 'secondary';
+        }
+
+        function getStatusText(status) {
+            const texts = { 'Pending': 'در انتظار', 'Confirmed': 'تایید شده', 'Completed': 'انجام شده', 'Canceled': 'لغو شده' };
+            return texts[status] || status;
+        }
+
+        function formatDateTime(dateStr) {
+            if (!dateStr) return '-';
+            const date = new Date(dateStr);
+            return date.toLocaleDateString('fa-IR') + ' ' + date.toLocaleTimeString('fa-IR', { hour: '2-digit', minute: '2-digit' });
+        }
+
+        function formatCurrency(amount) {
+            if (!amount) return '0 تومان';
+            return new Intl.NumberFormat('fa-IR').format(amount) + ' تومان';
+        }
+
+        function showLoading() {
+            document.getElementById('loadingOverlay').classList.add('show');
+        }
+
+        function hideLoading() {
+            document.getElementById('loadingOverlay').classList.remove('show');
+        }
+
+        async function apiCall(endpoint, options = {}) {
+            const response = await fetch(`${API_URL}${endpoint}`, {
+                ...options,
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                    ...options.headers
+                }
+            });
+
+            if (response.status === 401) {
+                logout();
+                return null;
+            }
+
+            if (!response.ok) throw new Error('API call failed');
+            return response.json();
+        }
+
+        function logout() {
+            localStorage.clear();
+            window.location.href = 'index.html';
+        }
+    </script>
+</body>
+
+</html>

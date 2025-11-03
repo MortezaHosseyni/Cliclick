@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="fa" dir="rtl">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,14 +8,47 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
     <style>
-        body { background-color: #f8f9fa; }
-        .sidebar { height: 100vh; position: fixed; right: 0; top: 0; width: 250px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding-top: 20px; }
-        .sidebar a { color: white; text-decoration: none; padding: 12px 20px; display: block; transition: 0.3s; }
-        .sidebar a:hover, .sidebar a.active { background-color: rgba(255,255,255,0.2); }
-        .main-content { margin-right: 250px; padding: 20px; }
-        .medication-item { border: 1px solid #dee2e6; padding: 10px; margin-bottom: 10px; border-radius: 5px; }
+        body {
+            background-color: #f8f9fa;
+        }
+
+        .sidebar {
+            height: 100vh;
+            position: fixed;
+            right: 0;
+            top: 0;
+            width: 250px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding-top: 20px;
+        }
+
+        .sidebar a {
+            color: white;
+            text-decoration: none;
+            padding: 12px 20px;
+            display: block;
+            transition: 0.3s;
+        }
+
+        .sidebar a:hover,
+        .sidebar a.active {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .main-content {
+            margin-right: 250px;
+            padding: 20px;
+        }
+
+        .medication-item {
+            border: 1px solid #dee2e6;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+        }
     </style>
 </head>
+
 <body>
     <div class="sidebar">
         <div class="text-center mb-4">
@@ -24,12 +58,10 @@
         <a href="patients.html" id="patientsLink"><i class="bi bi-people"></i> بیماران</a>
         <a href="appointments.html"><i class="bi bi-calendar-check"></i> نوبت‌ها</a>
         <a href="prescriptions.html" class="active"><i class="bi bi-prescription2"></i> نسخه‌ها</a>
-        <a href="medications.html"><i class="bi bi-capsule"></i> داروها</a>
+        <a href="medications.html" id="medicationsLink"><i class="bi bi-capsule"></i> داروها</a>
         <a href="factors.html"><i class="bi bi-file-earmark-medical"></i> فاکتورها</a>
         <a href="insurance.html"><i class="bi bi-shield-check"></i> بیمه</a>
-        <a href="support.html"><i class="bi bi-chat-dots"></i> پشتیبانی</a>
-        <a href="reports.html"><i class="bi bi-graph-up"></i> گزارشات</a>
-        <a href="settings.html"><i class="bi bi-gear"></i> تنظیمات</a>
+        <a href="reports.html" id="reportsLink"><i class="bi bi-graph-up"></i> گزارشات</a>
         <hr class="bg-white">
         <a href="#" onclick="logout()"><i class="bi bi-box-arrow-right"></i> خروج</a>
     </div>
@@ -37,7 +69,8 @@
     <div class="main-content">
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h2>مدیریت نسخه‌ها</h2>
-            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#prescriptionModal" onclick="resetForm()" id="addBtn">
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#prescriptionModal"
+                onclick="resetForm()" id="addBtn">
                 <i class="bi bi-plus-circle"></i> نسخه جدید
             </button>
         </div>
@@ -75,7 +108,9 @@
                             </tr>
                         </thead>
                         <tbody id="prescriptionsTable">
-                            <tr><td colspan="6" class="text-center">در حال بارگذاری...</td></tr>
+                            <tr>
+                                <td colspan="6" class="text-center">در حال بارگذاری...</td>
+                            </tr>
                         </tbody>
                     </table>
                 </div>
@@ -162,10 +197,10 @@
 
         if (!token) window.location.href = 'index.html';
 
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             modalInstance = new bootstrap.Modal(document.getElementById('prescriptionModal'));
             viewModalInstance = new bootstrap.Modal(document.getElementById('viewModal'));
-            
+
             if (user.role === 'Patient') {
                 document.getElementById('patientsLink').style.display = 'none';
                 document.getElementById('addBtn').style.display = 'none';
@@ -174,10 +209,10 @@
             } else {
                 loadPatients();
             }
-            
+
             loadMedications();
             loadPrescriptions();
-            
+
             document.getElementById('prescriptionForm').addEventListener('submit', savePrescription);
             document.getElementById('patientFilter').addEventListener('change', filterPrescriptions);
             document.getElementById('searchInput').addEventListener('input', filterPrescriptions);
@@ -193,7 +228,7 @@
                     patients = await response.json();
                     const select = document.getElementById('patient_id');
                     const filter = document.getElementById('patientFilter');
-                    
+
                     const options = patients.map(p => `<option value="${p.id}">${p.user_full_name || 'نامشخص'}</option>`).join('');
                     select.innerHTML = '<option value="">انتخاب کنید...</option>' + options;
                     filter.innerHTML = '<option value="">همه بیماران</option>' + options;
@@ -219,7 +254,7 @@
 
         async function loadPrescriptions() {
             try {
-                const endpoint = user.role === 'Patient' 
+                const endpoint = user.role === 'Patient'
                     ? '/api/v1/prescriptions/prescriptions/my'
                     : '/api/v1/prescriptions/prescriptions/';
 
@@ -232,7 +267,7 @@
                     displayPrescriptions(prescriptions);
                 }
             } catch (error) {
-                document.getElementById('prescriptionsTable').innerHTML = 
+                document.getElementById('prescriptionsTable').innerHTML =
                     '<tr><td colspan="6" class="text-center text-danger">خطا در بارگذاری اطلاعات</td></tr>';
             }
         }
@@ -247,7 +282,7 @@
             tbody.innerHTML = data.map(p => {
                 const date = new Date(p.created_at);
                 const isEditable = user.role !== 'Patient';
-                
+
                 return `
                     <tr>
                         <td>${p.patient_name || 'نامشخص'}</td>
@@ -281,7 +316,7 @@
             }
 
             if (search) {
-                filtered = filtered.filter(p => 
+                filtered = filtered.filter(p =>
                     (p.patient_name && p.patient_name.toLowerCase().includes(search)) ||
                     (p.doctor_name && p.doctor_name.toLowerCase().includes(search)) ||
                     (p.diagnosis && p.diagnosis.toLowerCase().includes(search))
@@ -308,8 +343,8 @@
         function addMedicationRow() {
             const container = document.getElementById('medicationsContainer');
             const index = container.children.length;
-            
-            const medOptions = medications.map(m => 
+
+            const medOptions = medications.map(m =>
                 `<option value="${m.id}">${m.name} ${m.strength ? '- ' + m.strength : ''}</option>`
             ).join('');
 
@@ -347,13 +382,13 @@
                     </div>
                 </div>
             `;
-            
+
             container.appendChild(row);
         }
 
         async function savePrescription(e) {
             e.preventDefault();
-            
+
             const medicationItems = [];
             document.querySelectorAll('.medication-item').forEach(item => {
                 const medId = item.querySelector('.medication-select').value;
@@ -417,7 +452,7 @@
                 if (response.ok) {
                     currentViewPrescription = await response.json();
                     const date = new Date(currentViewPrescription.created_at);
-                    
+
                     let html = `
                         <div class="mb-3">
                             <strong>بیمار:</strong> ${currentViewPrescription.patient_name || 'نامشخص'}<br>
@@ -453,25 +488,13 @@
                     });
 
                     html += '</tbody></table>';
-                    
+
                     document.getElementById('viewModalBody').innerHTML = html;
                     viewModalInstance.show();
                 }
             } catch (error) {
                 alert('خطا در بارگذاری اطلاعات');
             }
-        }
-
-        function printPrescription() {
-            const content = document.getElementById('viewModalBody').innerHTML;
-            const printWindow = window.open('', '', 'height=600,width=800');
-            printWindow.document.write('<html><head><title>چاپ نسخه</title>');
-            printWindow.document.write('<style>body{font-family:Tahoma;direction:rtl;} table{width:100%;border-collapse:collapse;} th,td{border:1px solid #ddd;padding:8px;text-align:right;}</style>');
-            printWindow.document.write('</head><body>');
-            printWindow.document.write(content);
-            printWindow.document.write('</body></html>');
-            printWindow.document.close();
-            printWindow.print();
         }
 
         async function deletePrescription(id) {
@@ -496,6 +519,27 @@
             localStorage.clear();
             window.location.href = 'index.html';
         }
+
+        function printPrescription() {
+            const content = document.getElementById('viewModalBody').innerHTML;
+            const printWindow = window.open('', '_blank', 'height=600,width=800');
+
+            // Use DOM methods instead of document.write
+            printWindow.document.head.innerHTML = `
+                <title>چاپ نسخه</title>
+                <style>
+                    body { font-family: Tahoma; direction: rtl; }
+                    table { width: 100%; border-collapse: collapse; }
+                    th, td { border: 1px solid #ddd; padding: 8px; text-align: right; }
+                </style>
+            `;
+            printWindow.document.body.innerHTML = content;
+            printWindow.focus();
+            printWindow.print();
+            printWindow.close();
+        }
+
     </script>
 </body>
+
 </html>
